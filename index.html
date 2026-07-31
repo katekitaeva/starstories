@@ -1,4 +1,11 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Тренажёр STAR</title>
 <style>
+  html{-webkit-text-size-adjust:100%;text-size-adjust:100%;}
   :root{
     --paper: #F5F4EF;
     --paper-raised: #FCFBF8;
@@ -114,7 +121,45 @@
 
   .footer-note{margin-top:30px;color:var(--ink-soft);font-size:12px;font-family:var(--mono);text-align:center;}
   .footer-note a{color:var(--ink-soft);}
+
+  /* ---------- Мобильная адаптация ---------- */
+  @media (max-width: 640px){
+    .app{padding:0 14px 60px;}
+    .hero-row{padding:0 14px;gap:8px;align-items:flex-start;}
+    .hero-row h1{font-size:22px;}
+    .hero-row p{font-size:13px;}
+    .hero-index{display:none;}
+    .stats-row{grid-template-columns:repeat(2,1fr);gap:8px;}
+    .stat{padding:10px 12px;}
+    .stat .num{font-size:19px;}
+    .draw-zone{padding:16px 14px;}
+    .draw-header h2{font-size:17px;}
+    .mode-select{width:100%;}
+    .chip{font-size:12px;padding:7px 11px;}
+    .settings-panel{padding:16px 14px;}
+    .settings-grid{grid-template-columns:1fr;}
+    .dims{grid-template-columns:1fr 1fr;gap:10px;}
+    .drawn-body{padding:16px 14px 18px;}
+    .drawn-card h3{font-size:19px;}
+    .drawn-card .brief{font-size:14px;}
+    .btn{font-size:13.5px;padding:10px 16px;width:100%;justify-content:center;}
+    .btn-row{flex-direction:column;align-items:stretch;}
+    .btn-row .chip{width:auto;}
+    .timer{font-size:22px;margin-left:0;text-align:center;}
+    select, .search, input, textarea{font-size:16px;} /* блокирует авто-зум на iOS при фокусе */
+    .filters{flex-direction:column;}
+    .filters select, .filters .search{width:100%;}
+    .catalog{grid-template-columns:1fr;}
+    .cat-title{font-size:14px;}
+  }
+  @media (max-width: 420px){
+    .stats-row{grid-template-columns:1fr 1fr;}
+    .dims{grid-template-columns:1fr;}
+    .mode-select .chip{flex:1 1 auto;text-align:center;}
+  }
 </style>
+</head>
+<body>
 
 <header class="hero">
   <div class="hero-row">
@@ -228,8 +273,8 @@ function empVar(employer){ return EMP_COLOR[employer] || '--personal'; }
 // ---------- GitHub-backed storage ----------
 function loadCfg(){
   cfg = {
-    owner: localStorage.getItem('star_gh_owner') || '',
-    repo: localStorage.getItem('star_gh_repo') || '',
+    owner: localStorage.getItem('star_gh_owner') || 'katekitaeva',
+    repo: localStorage.getItem('star_gh_repo') || 'starstories',
     branch: localStorage.getItem('star_gh_branch') || 'main',
     path: localStorage.getItem('star_gh_path') || 'data.json',
     token: localStorage.getItem('star_gh_token') || ''
@@ -581,3 +626,5 @@ async function init(){
 }
 init();
 </script>
+</body>
+</html>
