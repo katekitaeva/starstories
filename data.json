@@ -1,0 +1,448 @@
+[
+  {
+    "id": "case_portfolio_management_wiley",
+    "year": "2018-07",
+    "employer": "Wiley",
+    "emoji": "⚙️",
+    "title": "MS Project + Jira: единая система прогнозирования",
+    "profiles": [
+      "profile_DeliveryLead",
+      "profile_ProjectManager",
+      "profile_Methodologist",
+      "profile_TransformationLead"
+    ],
+    "type": "system",
+    "brief": "Спроектировала математическое ядро прогнозирования дат в MS Project и связала его с Jira как единым источником истины для 50+ человек контент-продакшна и стейкхолдеров по всему миру.",
+    "attempts": []
+  },
+  {
+    "id": "case_agile_transformation_wiley",
+    "year": "2022-03",
+    "employer": "Wiley",
+    "emoji": "⚙️📖",
+    "title": "Custom Courses Production: сквозной поток без мандата",
+    "profiles": [
+      "profile_TransformationLead",
+      "profile_DeliveryLead",
+      "profile_AgileCoach",
+      "profile_ProjectManager",
+      "profile_ScrumMaster"
+    ],
+    "type": "mixed",
+    "brief": "Получив карт-бланш от руководителя, соединила бизнес, контент и IT в спринты для кастомных курсов и сократила TTM с 10 до 4 месяцев.",
+    "attempts": []
+  },
+  {
+    "id": "case_gpb_summary",
+    "year": "2024-03",
+    "employer": "ГПБ",
+    "emoji": "🏛️",
+    "title": "Общий трек ГПБ: от хаоса к 85% предсказуемости",
+    "profiles": [
+      "profile_Methodologist",
+      "profile_DeliveryLead",
+      "profile_TransformationLead",
+      "profile_AgileCoach"
+    ],
+    "type": "system",
+    "brief": "Сводный кейс всей трансформации стрима Daily Banking: диагностика, гигиена Jira, KPI-эпики, пересборка вокруг CJM — Predictability выросла с 20% до 85%.",
+    "attempts": []
+  },
+  {
+    "id": "case_baseline_diagnosis",
+    "year": "2024-04",
+    "employer": "ГПБ",
+    "emoji": "📊",
+    "title": "Baseline: фиксация нулевого состояния",
+    "profiles": [
+      "profile_Methodologist",
+      "profile_DeliveryLead",
+      "profile_TransformationLead",
+      "profile_AgileCoach"
+    ],
+    "type": "system",
+    "brief": "Спроектировала трёхуровневую доску гигиены бэклога и оцифровала baseline (Predictability 20%, TTM 8 мес, 85% межкомандных зависимостей) как базу для всей трансформации.",
+    "attempts": []
+  },
+  {
+    "id": "case_organizational_design",
+    "year": "2024-05",
+    "employer": "ГПБ",
+    "emoji": "🏛️",
+    "title": "8 команд вокруг клиентского пути",
+    "profiles": [
+      "profile_TransformationLead",
+      "profile_DeliveryLead",
+      "profile_AgileCoach",
+      "profile_Methodologist"
+    ],
+    "type": "system",
+    "brief": "На основе данных о задержках на стыках команд провела структурный эксперимент — пересборку 8 компонентных команд вокруг CJM, доля эпиков в одной команде выросла с 5% до 85%.",
+    "attempts": []
+  },
+  {
+    "id": "case_scrum_masters_scaling",
+    "year": "2024-05",
+    "employer": "ГПБ",
+    "emoji": "⚙️",
+    "title": "Масштабирование через внутренних Scrum-мастеров",
+    "profiles": [
+      "profile_AgileCoach",
+      "profile_ScrumMaster",
+      "profile_TransformationLead",
+      "profile_DeliveryLead",
+      "profile_Methodologist",
+      "profile_ProjectManager"
+    ],
+    "type": "mixed",
+    "brief": "Построила систему масштабирования практик с 0 до 8 команд через обучение внутренних Scrum-мастеров, Lead Time сократился с 4 месяцев до 2 недель.",
+    "attempts": []
+  },
+  {
+    "id": "case_kpi_epics",
+    "year": "2024-06",
+    "employer": "ГПБ",
+    "emoji": "🏛️",
+    "title": "KPI-эпики для PI: провал как данные",
+    "profiles": [
+      "profile_TransformationLead",
+      "profile_DeliveryLead",
+      "profile_Methodologist",
+      "profile_AgileCoach"
+    ],
+    "type": "system",
+    "brief": "Внедрила на уровне банка публичные KPI-эпики с ценой за невыполнение; провал 3 из 5 стал триггером для системного анализа ограничений, а не поиска виноватых.",
+    "attempts": []
+  },
+  {
+    "id": "case_prioritization_system",
+    "year": "2024-07",
+    "employer": "ГПБ",
+    "emoji": "⚙️",
+    "title": "Единая приоритизация на стрим",
+    "profiles": [
+      "profile_AgileCoach",
+      "profile_DeliveryLead",
+      "profile_TransformationLead",
+      "profile_Methodologist"
+    ],
+    "type": "mixed",
+    "brief": "Фасилитировала сессию с 8 PO и техлидами, спроектировали десятибалльную шкалу приоритизации, позже эволюционировавшую в WSJF.",
+    "attempts": []
+  },
+  {
+    "id": "case_coaching_framework",
+    "year": "2024-08",
+    "employer": "ГПБ",
+    "emoji": "📖",
+    "title": "Обучение вертикальной декомпозиции через симуляцию",
+    "profiles": [
+      "profile_AgileCoach",
+      "profile_ScrumMaster",
+      "profile_DeliveryLead",
+      "profile_TransformationLead"
+    ],
+    "type": "people",
+    "brief": "Обучила команду «Касатки» вертикальной декомпозиции через бытовую аналогию и симуляцию YouTube-канала, сократив Lead Time в 3 раза.",
+    "attempts": []
+  },
+  {
+    "id": "case_budget_management",
+    "year": "2024-09",
+    "employer": "ГПБ",
+    "emoji": "💰",
+    "title": "ФОТ в Jira: от Excel к реальному времени",
+    "profiles": [
+      "profile_DeliveryLead",
+      "profile_Methodologist",
+      "profile_TransformationLead",
+      "profile_ProjectManager"
+    ],
+    "type": "system",
+    "brief": "Спроектировала учёт ФОТ в Jira вместо ручного Excel, сократив время получения данных с недели до 2 минут; практика масштабирована на 40 стримов банка.",
+    "attempts": []
+  },
+  {
+    "id": "case_leadership_lesson",
+    "year": "2024-09",
+    "employer": "ГПБ",
+    "emoji": "⚔️",
+    "title": "Моя ошибка «не та мишень»",
+    "profiles": [
+      "profile_AgileCoach",
+      "profile_ScrumMaster",
+      "profile_TransformationLead"
+    ],
+    "type": "people",
+    "brief": "Потратила месяцы на переубеждение техлида-скептика вместо создания коалиции с командой — классический кейс про ошибку и извлечённый урок.",
+    "attempts": []
+  },
+  {
+    "id": "case_team_entry",
+    "year": "2024-09",
+    "employer": "ГПБ",
+    "emoji": "🧠",
+    "title": "Знакомство с PO: техника 1-2-4-6",
+    "profiles": [
+      "profile_AgileCoach",
+      "profile_ScrumMaster",
+      "profile_ProjectManager"
+    ],
+    "type": "people",
+    "brief": "Спроектировала сессию по технике 1-2-4-6 для нового PO и команды, зафиксировав ожидания в Confluence до начала конфликтов; предсказуемость выросла с 60% до 85%.",
+    "attempts": []
+  },
+  {
+    "id": "case_nps_feedback_gpb",
+    "year": "2024-12",
+    "employer": "ГПБ",
+    "emoji": "👥",
+    "title": "NPS-feedback для Scrum-мастеров",
+    "profiles": [
+      "profile_AgileCoach",
+      "profile_ScrumMaster",
+      "profile_TransformationLead",
+      "profile_DeliveryLead",
+      "profile_Methodologist",
+      "profile_ProjectManager"
+    ],
+    "type": "system",
+    "brief": "Разработала минималистичную (2 вопроса) анонимную методику оценки эффективности коуча, протестировала на себе на 60 респондентах и масштабировала на всех Scrum-мастеров.",
+    "attempts": []
+  },
+  {
+    "id": "case_insurance_debit_card",
+    "year": "2025-03",
+    "employer": "ГПБ",
+    "emoji": "🏗️",
+    "title": "Страховка на дебетовую карту за 1 квартал",
+    "profiles": [
+      "profile_ProjectManager",
+      "profile_DeliveryLead",
+      "profile_TransformationLead"
+    ],
+    "type": "system",
+    "brief": "Перестроила процесс с последовательной модели на параллельную работу бизнеса и IT, сжав срок с субъективных 3 кварталов до 1.",
+    "attempts": []
+  },
+  {
+    "id": "case_loyalty_program_redesign",
+    "year": "2025-04",
+    "employer": "ГПБ",
+    "emoji": "🏗️",
+    "title": "Программа лояльности: пересогласование срока на данных",
+    "profiles": [
+      "profile_ProjectManager",
+      "profile_DeliveryLead",
+      "profile_TransformationLead"
+    ],
+    "type": "system",
+    "brief": "На основе фактической скорости 12 частично занятых команд доказала бизнесу нереалистичность спущенного срока и пересогласовала его; система пережила смену PM.",
+    "attempts": []
+  },
+  {
+    "id": "case_release_transformation",
+    "year": "2025-05",
+    "employer": "ГПБ",
+    "emoji": "⚙️",
+    "title": "CI/CD после падения приложения",
+    "profiles": [
+      "profile_AgileCoach",
+      "profile_TransformationLead",
+      "profile_DeliveryLead",
+      "profile_ProjectManager"
+    ],
+    "type": "mixed",
+    "brief": "Сознательно не спасала команду от последствий игнорирования инженерных практик — после падения приложения команда сама разработала план внедрения Feature Toggles и CI/CD.",
+    "attempts": []
+  },
+  {
+    "id": "case_migration_legacy",
+    "year": "2025-06",
+    "employer": "ГПБ",
+    "emoji": "🏗️",
+    "title": "Миграция 5NT в микросервисы с лимитом 20%",
+    "profiles": [
+      "profile_ProjectManager",
+      "profile_DeliveryLead",
+      "profile_TransformationLead",
+      "profile_Methodologist"
+    ],
+    "type": "system",
+    "brief": "Провела миграцию бизнес-логики 5 команд из легаси-платформы в микросервисы через MoSCoW с жёстким лимитом 20% ёмкости на команду.",
+    "attempts": []
+  },
+  {
+    "id": "case_vendor_management",
+    "year": "2025-06",
+    "employer": "ГПБ",
+    "emoji": "💰",
+    "title": "Вендор Diasoft: из чёрного ящика в поток",
+    "profiles": [
+      "profile_DeliveryLead",
+      "profile_TransformationLead",
+      "profile_ProjectManager",
+      "profile_Methodologist"
+    ],
+    "type": "system",
+    "brief": "Встроила внешнего вендора в единый портфельный бэклог с финансовой прозрачностью, сократив TTM с 8 до 2,5 месяцев.",
+    "attempts": []
+  },
+  {
+    "id": "case_po_mediation",
+    "year": "2025-07",
+    "employer": "ГПБ",
+    "emoji": "🧠",
+    "title": "Медиация PO при роспуске команды «Байкал»",
+    "profiles": [
+      "profile_AgileCoach",
+      "profile_ScrumMaster",
+      "profile_ProjectManager",
+      "profile_DeliveryLead"
+    ],
+    "type": "people",
+    "brief": "Спроектировала передачу активов между двумя PO с разногласиями через фасилитацию и публичное назначение ответственности — закрыла команду без «хвостов».",
+    "attempts": []
+  },
+  {
+    "id": "case_ai_prompt_library",
+    "year": "2025-09",
+    "employer": "ГПБ",
+    "emoji": "🤖",
+    "title": "Библиотека промтов для 30+ Scrum-мастеров",
+    "profiles": [
+      "profile_AgileCoach",
+      "profile_Methodologist",
+      "profile_AIIntegrator"
+    ],
+    "type": "system",
+    "brief": "Создала и масштабировала библиотеку AI-промптов для типовых ситуаций коучинга, сократив собственную нагрузку на оперативные консультации на 40%.",
+    "attempts": []
+  },
+  {
+    "id": "case_playbook_development",
+    "year": "2025-10",
+    "employer": "Криптонит",
+    "emoji": "📖",
+    "title": "Playbook: от 10 до 200 просмотров в месяц",
+    "profiles": [
+      "profile_Methodologist",
+      "profile_AgileCoach",
+      "profile_TransformationLead",
+      "profile_DeliveryLead"
+    ],
+    "type": "system",
+    "brief": "Перепроектировала мёртвый корпоративный Playbook в единую систему со стадиями зрелости и сценариями поведения — посещаемость выросла в 20 раз.",
+    "attempts": []
+  },
+  {
+    "id": "case_scope_management",
+    "year": "2025-10",
+    "employer": "Криптонит",
+    "emoji": "📊",
+    "title": "Фиксация demo-scope для критического демо",
+    "profiles": [
+      "profile_DeliveryLead",
+      "profile_TransformationLead",
+      "profile_ProjectManager"
+    ],
+    "type": "mixed",
+    "brief": "Внедрила Burn-down и Jira Structure вместо PowerPoint-отчётов, вскрыла скрытый 20%-й недельный рост скоупа и зафиксировала MVP для демо, критичного для финансирования.",
+    "attempts": []
+  },
+  {
+    "id": "case_process_design_rollout",
+    "year": "2025-11",
+    "employer": "Криптонит",
+    "emoji": "🧩",
+    "title": "Единая модель бэклогов в 7 стримах",
+    "profiles": [
+      "profile_TransformationLead",
+      "profile_DeliveryLead",
+      "profile_AgileCoach",
+      "profile_ProjectManager"
+    ],
+    "type": "system",
+    "brief": "Унифицировала 7 разнородных Jira-конфигураций через ТЗ, песочницу «Энигма-Град» и обучение — синхронизации сократились с 90-120 до 45 минут.",
+    "attempts": []
+  },
+  {
+    "id": "case_portfolio_unification",
+    "year": "2025-12",
+    "employer": "Криптонит",
+    "emoji": "🧩",
+    "title": "Обучение через песочницу «Энигма-Град»",
+    "profiles": [
+      "profile_TransformationLead",
+      "profile_Methodologist",
+      "profile_DeliveryLead",
+      "profile_AgileCoach",
+      "profile_ScrumMaster",
+      "profile_ProjectManager"
+    ],
+    "type": "mixed",
+    "brief": "Месяц исследовала боль команд, спроектировала прототип единой модели бэклога и через диалог (не директиву) добилась совместного решения о масштабировании на 7 стримов.",
+    "attempts": []
+  },
+  {
+    "id": "case_conflict_resolution",
+    "year": "2026-01",
+    "employer": "Криптонит",
+    "emoji": "⚔️",
+    "title": "Публичная атака CTO на Q&A с 70 участниками",
+    "profiles": [
+      "profile_AgileCoach",
+      "profile_TransformationLead",
+      "profile_ProjectManager"
+    ],
+    "type": "people",
+    "brief": "Перевела публичную критику CTO в приватный диалог, признала ограничения MVP-подхода и предложила дорожную карту — запуск квартального планирования не был заблокирован.",
+    "attempts": []
+  },
+  {
+    "id": "case_quarterly_planning_system",
+    "year": "2026-01",
+    "employer": "Криптонит",
+    "emoji": "🗓️",
+    "title": "Запуск квартального планирования на 300+ человек",
+    "profiles": [
+      "profile_TransformationLead",
+      "profile_DeliveryLead",
+      "profile_Methodologist",
+      "profile_ProjectManager"
+    ],
+    "type": "system",
+    "brief": "Спроектировала двухэтапную приоритизацию и регулярный цикл синхронизаций для 7 стримов — бизнес впервые получил единую картину портфеля в реальном времени.",
+    "attempts": []
+  },
+  {
+    "id": "case_release_standardization",
+    "year": "2026-01",
+    "employer": "Криптонит",
+    "emoji": "🚀",
+    "title": "Выравнивание практики релизов в 20 командах",
+    "profiles": [
+      "profile_TransformationLead",
+      "profile_DeliveryLead",
+      "profile_ProjectManager",
+      "profile_Methodologist",
+      "profile_AgileCoach"
+    ],
+    "type": "mixed",
+    "brief": "Взяла практику 3 передовых команд за эталон и через публичную прозрачность (а не директиву) масштабировала стандарт релизов на 20 команд и 10 ЦОДов.",
+    "attempts": []
+  },
+  {
+    "id": "case_ai_response_system",
+    "year": "2026-05",
+    "employer": null,
+    "emoji": "🤖",
+    "title": "AI-система подготовки откликов на вакансии",
+    "profiles": [
+      "profile_AIIntegrator"
+    ],
+    "type": "system",
+    "brief": "Личный проект: спроектировала воронку скоринга вакансий и human-in-the-loop систему генерации откликов, сократив время подготовки одного отклика с 6 часов до 1,5.",
+    "attempts": []
+  }
+]

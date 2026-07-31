@@ -1,0 +1,583 @@
+<style>
+  :root{
+    --paper: #F5F4EF;
+    --paper-raised: #FCFBF8;
+    --ink: #1E2420;
+    --ink-soft: #4A544C;
+    --rule: #D9D6CC;
+    --rule-strong: #B7B2A2;
+
+    --wiley: #3E5C8A;
+    --gpb: #2E6B52;
+    --kryptonit: #7A3A5C;
+    --personal: #9A6B1E;
+
+    --accent: #B4472B;
+    --good: #2E6B52;
+    --bad: #B4472B;
+
+    --serif: Georgia, "Iowan Old Style", "Palatino Linotype", "Book Antiqua", serif;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);}
+  .app{max-width:900px;margin:0 auto;padding:0 16px 80px;}
+
+  header.hero{
+    position:sticky;top:0;z-index:50;background:var(--paper);
+    border-bottom:2px solid var(--ink);padding:16px 0 14px;margin-bottom:22px;
+  }
+  .hero-row{max-width:900px;margin:0 auto;padding:0 16px;display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;}
+  .hero-row h1{font-family:var(--serif);font-weight:700;font-size:28px;margin:0 0 4px;}
+  .hero-row p{margin:0;color:var(--ink-soft);font-size:14px;}
+  .hero-right{display:flex;align-items:center;gap:10px;}
+  .hero-index{font-family:var(--mono);font-size:12px;color:var(--ink-soft);white-space:nowrap;}
+  .sync-badge{font-family:var(--mono);font-size:11px;padding:3px 9px;border-radius:999px;border:1px solid var(--rule-strong);}
+  .sync-badge.ok{color:var(--good);border-color:var(--good);}
+  .sync-badge.off{color:var(--bad);border-color:var(--bad);}
+  .settings-btn{background:none;border:1px solid var(--ink);border-radius:999px;width:28px;height:28px;cursor:pointer;font-size:13px;}
+
+  .settings-panel{display:none;background:var(--paper-raised);border:2px solid var(--ink);border-radius:4px;padding:18px 20px;margin-bottom:24px;}
+  .settings-panel.open{display:block;}
+  .settings-panel h3{font-family:var(--serif);margin:0 0 4px;font-size:17px;}
+  .settings-panel p{color:var(--ink-soft);font-size:12.5px;margin:0 0 14px;line-height:1.5;}
+  .settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+  .settings-grid label{font-family:var(--mono);font-size:11px;color:var(--ink-soft);display:block;margin-bottom:4px;}
+  .settings-grid input{width:100%;padding:8px 10px;border:1px solid var(--rule-strong);border-radius:4px;font-family:var(--mono);font-size:13px;background:var(--paper);color:var(--ink);}
+  .settings-full{grid-column:1/-1;}
+
+  .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:26px;}
+  .stat{background:var(--paper-raised);border:1px solid var(--rule);border-radius:4px;padding:12px 14px;}
+  .stat .num{font-family:var(--serif);font-size:23px;font-weight:700;}
+  .stat .label{font-family:var(--mono);font-size:10.5px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:0.06em;margin-top:2px;}
+
+  .draw-zone{background:var(--paper-raised);border:2px solid var(--ink);border-radius:4px;padding:22px 20px;margin-bottom:28px;}
+  .draw-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px;}
+  .draw-header h2{font-family:var(--serif);font-size:19px;margin:0;font-weight:700;}
+  .mode-select{display:flex;gap:6px;flex-wrap:wrap;}
+  .chip{font-family:var(--sans);font-weight:600;font-size:12.5px;padding:7px 12px;border-radius:999px;border:2px solid var(--ink);background:var(--paper-raised);color:var(--ink);cursor:pointer;}
+  .chip.active{background:var(--ink);color:var(--paper);}
+
+  .card-outline{min-height:150px;display:flex;align-items:center;justify-content:center;}
+  .drawn-card{width:100%;background:var(--paper-raised);border:2px solid var(--ink);border-radius:4px;overflow:hidden;position:relative;}
+  .drawn-tab{padding:6px 16px;font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:0.5px;color:var(--paper);}
+  .drawn-body{padding:18px 20px 20px;}
+  .drawn-card h3{font-family:var(--serif);font-size:21px;margin:0 0 4px;font-weight:700;line-height:1.3;}
+  .drawn-card .meta{font-family:var(--mono);font-size:11px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:12px;}
+  .drawn-card .brief{color:var(--ink);font-size:15px;line-height:1.55;margin-bottom:6px;}
+  .drawn-card .id{position:absolute;top:6px;right:14px;font-family:var(--mono);font-size:9px;color:var(--paper);opacity:0.7;}
+  .mode-hint{color:var(--accent);font-size:12px;font-family:var(--mono);margin-bottom:10px;font-weight:600;}
+  .empty-draw{color:var(--ink-soft);font-family:var(--mono);font-size:13px;text-align:center;}
+
+  .btn{font-family:var(--sans);font-size:14px;font-weight:700;padding:10px 18px;border-radius:999px;border:2px solid var(--ink);cursor:pointer;}
+  .btn-primary{background:var(--ink);color:var(--paper);}
+  .btn-primary:hover{background:#333d37;}
+  .btn-primary:disabled{opacity:0.4;cursor:not-allowed;}
+  .btn-ghost{background:var(--paper-raised);color:var(--ink);}
+  .btn-ghost:hover{background:var(--rule);}
+  .btn-row{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;align-items:center;}
+
+  .timer{font-family:var(--mono);font-size:26px;color:var(--accent);margin-left:auto;font-weight:700;}
+
+  .paste-zone{margin-top:18px;padding-top:16px;border-top:1px dashed var(--rule-strong);}
+  .paste-zone label{display:block;font-family:var(--mono);font-size:11px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;}
+  .paste-zone textarea{width:100%;min-height:60px;background:var(--paper);border:1px solid var(--rule-strong);border-radius:4px;color:var(--ink);font-family:var(--mono);font-size:12px;padding:10px;resize:vertical;}
+  .paste-msg{font-size:12px;margin-top:8px;font-family:var(--mono);font-weight:600;}
+  .paste-msg.ok{color:var(--good);}
+  .paste-msg.err{color:var(--bad);}
+
+  .manual-score{margin-top:16px;padding-top:16px;border-top:1px dashed var(--rule-strong);}
+  .dims{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px;margin-bottom:12px;}
+  .dim label{font-family:var(--mono);font-size:11px;color:var(--ink-soft);display:flex;justify-content:space-between;margin-bottom:4px;}
+  .dim input[type=range]{width:100%;accent-color:var(--accent);}
+  .manual-score textarea{width:100%;background:var(--paper);border:1px solid var(--rule-strong);border-radius:4px;color:var(--ink);font-family:var(--sans);font-size:13px;padding:10px;min-height:46px;margin-bottom:10px;}
+
+  .section-title{font-family:var(--serif);font-size:20px;font-weight:700;margin:0 0 14px;}
+  .filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;}
+  select, .search{background:var(--paper-raised);border:1px solid var(--rule-strong);color:var(--ink);font-family:var(--sans);font-size:13px;padding:8px 12px;border-radius:4px;}
+  .search{flex:1;min-width:160px;}
+
+  .catalog{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px;margin-bottom:6px;}
+  .cat-card{background:var(--paper-raised);border:1px solid var(--rule);border-left:4px solid var(--rule-strong);border-radius:4px;padding:12px 14px;cursor:pointer;}
+  .cat-card:hover{background:var(--rule);}
+  .cat-card.strong{border-left-color:var(--good);}
+  .cat-card.weak{border-left-color:var(--bad);}
+  .cat-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;}
+  .cat-title{font-family:var(--sans);font-size:13.5px;font-weight:700;line-height:1.3;}
+  .cat-emp{font-family:var(--mono);font-size:10px;color:var(--ink-soft);text-transform:uppercase;margin-top:6px;}
+  .score-badge{font-family:var(--mono);font-size:11px;font-weight:700;padding:2px 7px;border-radius:12px;white-space:nowrap;}
+  .score-badge.strong{background:rgba(46,107,82,0.13);color:var(--good);}
+  .score-badge.weak{background:rgba(180,71,43,0.13);color:var(--bad);}
+  .score-badge.new{background:rgba(74,84,76,0.1);color:var(--ink-soft);}
+  .cat-foot{margin-top:9px;font-family:var(--mono);font-size:10px;color:var(--ink-soft);}
+
+  .footer-note{margin-top:30px;color:var(--ink-soft);font-size:12px;font-family:var(--mono);text-align:center;}
+  .footer-note a{color:var(--ink-soft);}
+</style>
+
+<header class="hero">
+  <div class="hero-row">
+    <div>
+      <h1>Тренажёр STAR</h1>
+      <p>28 кейсов · прогресс хранится в GitHub, доступно с любого устройства</p>
+    </div>
+    <div class="hero-right">
+      <span class="sync-badge off" id="syncBadge">не подключено</span>
+      <button class="settings-btn" id="settingsBtn" title="Настройки подключения">⚙</button>
+    </div>
+  </div>
+</header>
+
+<div class="app">
+  <div class="settings-panel" id="settingsPanel">
+    <h3>Подключение к GitHub</h3>
+    <p>Токен хранится только в этом браузере (localStorage) и никогда не попадает в код страницы или в репозиторий. На новом устройстве введи его заново. Нужен fine-grained personal access token с правом Contents: Read and write только для этого репозитория.</p>
+    <div class="settings-grid">
+      <div><label>Владелец (username)</label><input id="cfgOwner" placeholder="ekaterina-kitaeva"></div>
+      <div><label>Репозиторий</label><input id="cfgRepo" placeholder="star-trainer"></div>
+      <div><label>Ветка</label><input id="cfgBranch" placeholder="main" value="main"></div>
+      <div><label>Путь к файлу</label><input id="cfgPath" placeholder="data.json" value="data.json"></div>
+      <div class="settings-full"><label>Personal Access Token</label><input id="cfgToken" type="password" placeholder="github_pat_..."></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" id="cfgSaveBtn">Сохранить и подключить</button>
+      <button class="btn btn-ghost" id="cfgClearBtn">Отключить и забыть токен</button>
+    </div>
+  </div>
+
+  <div class="stats-row" id="statsRow"></div>
+
+  <div class="draw-zone">
+    <div class="draw-header">
+      <h2>Вытянуть кейс</h2>
+      <div class="mode-select" id="modeSelect"></div>
+    </div>
+    <div class="card-outline" id="drawArea">
+      <div class="empty-draw">Нажми «Вытянуть», чтобы получить кейс — приоритет тем, что давно не тренировались или получали низкие оценки</div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" id="drawBtn">🎴 Вытянуть кейс</button>
+      <button class="btn btn-ghost" id="timerBtn60" style="display:none">⏱ 60 сек</button>
+      <button class="btn btn-ghost" id="timerBtn180" style="display:none">⏱ 3 мин</button>
+      <span class="timer" id="timerDisplay"></span>
+    </div>
+
+    <div class="paste-zone" id="pasteZone" style="display:none">
+      <label>Вставь строку SCORE из ответа коуча — распознаю и сохраню в GitHub автоматически</label>
+      <textarea id="pasteInput" placeholder='SCORE case_id=case_kpi_epics structure=4 specificity=3 quantification=5 naturalness=3 relevance=4 note="меньше воды в начале"'></textarea>
+      <div class="btn-row"><button class="btn btn-ghost" id="parseBtn">Разобрать и сохранить</button></div>
+      <div class="paste-msg" id="pasteMsg"></div>
+    </div>
+
+    <div class="manual-score" id="manualScore">
+      <label style="font-family:var(--mono);font-size:11px;color:var(--ink-soft);text-transform:uppercase;">Или оцени вручную</label>
+      <div class="dims" id="dimsArea"></div>
+      <textarea id="noteInput" placeholder="Что улучшить в следующий раз"></textarea>
+      <div class="btn-row"><button class="btn btn-primary" id="saveManualBtn">Сохранить оценку в GitHub</button></div>
+    </div>
+  </div>
+
+  <div class="section-title">Картотека прогресса</div>
+  <div class="filters">
+    <input class="search" id="searchInput" placeholder="Поиск по названию...">
+    <select id="employerFilter"></select>
+    <select id="typeFilter">
+      <option value="all">Все типы</option>
+      <option value="system">Системные / метрики</option>
+      <option value="people">Люди / конфликты</option>
+      <option value="mixed">Смешанные</option>
+    </select>
+    <select id="sortFilter">
+      <option value="weak">Сначала слабые</option>
+      <option value="stale">Давно не тренировались</option>
+      <option value="az">По алфавиту</option>
+      <option value="year">По дате</option>
+    </select>
+  </div>
+  <div id="catalogWrap"></div>
+
+  <div class="footer-note">Данные читаются и пишутся напрямую в твой GitHub-репозиторий · страница сама секретов не хранит</div>
+</div>
+
+<script>
+let CASES = [];
+let currentSha = null;
+let currentDrawn = null;
+let currentMode = 'roulette';
+let timerInterval = null;
+let cfg = {};
+
+const DIMS = [
+  {key:'structure', label:'Структура'},
+  {key:'specificity', label:'Конкретность'},
+  {key:'quantification', label:'Квантификация'},
+  {key:'naturalness', label:'Естественность'},
+  {key:'relevance', label:'Попадание'}
+];
+const MODES = [
+  {key:'roulette', label:'🎲 Рулетка'},
+  {key:'question', label:'❓ Вопрос интервьюера'},
+  {key:'timed', label:'⏱ На время'},
+  {key:'profile', label:'🔀 Смена профиля'},
+  {key:'headline', label:'⚡ Headline-дрилл'}
+];
+const EMP_COLOR = {'Wiley':'--wiley','ГПБ':'--gpb','Криптонит':'--kryptonit'};
+function empVar(employer){ return EMP_COLOR[employer] || '--personal'; }
+
+// ---------- GitHub-backed storage ----------
+function loadCfg(){
+  cfg = {
+    owner: localStorage.getItem('star_gh_owner') || '',
+    repo: localStorage.getItem('star_gh_repo') || '',
+    branch: localStorage.getItem('star_gh_branch') || 'main',
+    path: localStorage.getItem('star_gh_path') || 'data.json',
+    token: localStorage.getItem('star_gh_token') || ''
+  };
+}
+function saveCfg(){
+  localStorage.setItem('star_gh_owner', cfg.owner);
+  localStorage.setItem('star_gh_repo', cfg.repo);
+  localStorage.setItem('star_gh_branch', cfg.branch);
+  localStorage.setItem('star_gh_path', cfg.path);
+  localStorage.setItem('star_gh_token', cfg.token);
+}
+function clearCfg(){
+  ['owner','repo','branch','path','token'].forEach(k=>localStorage.removeItem('star_gh_'+k));
+  cfg = {owner:'',repo:'',branch:'main',path:'data.json',token:''};
+}
+function isConfigured(){ return cfg.owner && cfg.repo && cfg.token; }
+
+function b64DecodeUnicode(str){
+  return decodeURIComponent(atob(str).split('').map(c=>'%'+('00'+c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+}
+function b64EncodeUnicode(str){
+  return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (m,p1)=>String.fromCharCode('0x'+p1)));
+}
+
+async function fetchCasesViaApi(){
+  const url = `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${cfg.path}?ref=${cfg.branch}&_=${Date.now()}`;
+  const res = await fetch(url, {headers:{Authorization:`Bearer ${cfg.token}`, Accept:'application/vnd.github+json'}});
+  if(!res.ok) throw new Error('GitHub API: '+res.status);
+  const json = await res.json();
+  currentSha = json.sha;
+  return JSON.parse(b64DecodeUnicode(json.content));
+}
+async function fetchCasesViaRaw(){
+  const url = `https://raw.githubusercontent.com/${cfg.owner}/${cfg.repo}/${cfg.branch}/${cfg.path}?_=${Date.now()}`;
+  const res = await fetch(url);
+  if(!res.ok) throw new Error('raw fetch: '+res.status);
+  return res.json();
+}
+async function saveCasesViaApi(newCases){
+  const content = b64EncodeUnicode(JSON.stringify(newCases, null, 2));
+  const url = `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${cfg.path}`;
+  const res = await fetch(url, {
+    method:'PUT',
+    headers:{Authorization:`Bearer ${cfg.token}`, Accept:'application/vnd.github+json', 'Content-Type':'application/json'},
+    body: JSON.stringify({
+      message: `Обновление прогресса тренажёра STAR — ${new Date().toISOString()}`,
+      content, sha: currentSha, branch: cfg.branch
+    })
+  });
+  if(!res.ok){ const t = await res.text(); throw new Error('GitHub API save: '+res.status+' '+t); }
+  const json = await res.json();
+  currentSha = json.content.sha;
+}
+
+function setSyncBadge(ok, text){
+  const el = document.getElementById('syncBadge');
+  el.className = 'sync-badge ' + (ok?'ok':'off');
+  el.textContent = text;
+}
+
+async function loadAll(){
+  loadCfg();
+  document.getElementById('cfgOwner').value = cfg.owner;
+  document.getElementById('cfgRepo').value = cfg.repo;
+  document.getElementById('cfgBranch').value = cfg.branch;
+  document.getElementById('cfgPath').value = cfg.path;
+  document.getElementById('cfgToken').value = cfg.token;
+
+  if(isConfigured()){
+    try{
+      CASES = await fetchCasesViaApi();
+      setSyncBadge(true, `подключено: ${cfg.owner}/${cfg.repo}`);
+      document.getElementById('saveManualBtn').disabled = false;
+    }catch(e){
+      console.error(e);
+      setSyncBadge(false, 'ошибка подключения — открой ⚙');
+    }
+  } else if(cfg.owner && cfg.repo){
+    // read-only mode via public raw file
+    try{
+      CASES = await fetchCasesViaRaw();
+      setSyncBadge(false, 'только чтение — добавь токен в ⚙ для сохранения');
+    }catch(e){
+      console.error(e);
+      setSyncBadge(false, 'не удалось прочитать data.json');
+    }
+  } else {
+    setSyncBadge(false, 'не подключено — открой ⚙');
+  }
+}
+
+// ---------- data helpers ----------
+function getRec(id){
+  const c = CASES.find(x=>x.id===id);
+  if(!c) return {attempts:[]};
+  if(!c.attempts) c.attempts = [];
+  return c;
+}
+function overallScore(a){ return (a.structure+a.specificity+a.quantification+a.naturalness+a.relevance)/5; }
+function recentAvg(id){
+  const rec = getRec(id);
+  if(!rec.attempts.length) return null;
+  const last3 = rec.attempts.slice(-3);
+  return last3.reduce((s,a)=>s+overallScore(a),0)/last3.length;
+}
+function lastPracticed(id){
+  const rec = getRec(id);
+  return rec.attempts.length ? rec.attempts[rec.attempts.length-1].ts : null;
+}
+function daysSince(ts){ return ts ? (Date.now()-ts)/86400000 : 999; }
+function weightFor(id){
+  const avg = recentAvg(id);
+  if(avg===null) return 12;
+  let w = (6-avg);
+  w += Math.min(daysSince(lastPracticed(id))/7, 5);
+  return Math.max(w, 0.5);
+}
+function weightedDraw(pool){
+  const weights = pool.map(c=>weightFor(c.id));
+  const total = weights.reduce((a,b)=>a+b,0);
+  let r = Math.random()*total;
+  for(let i=0;i<pool.length;i++){ r -= weights[i]; if(r<=0) return pool[i]; }
+  return pool[pool.length-1];
+}
+
+async function persist(successMsg){
+  try{
+    await saveCasesViaApi(CASES);
+    flashMsg('pasteMsg', successMsg+' — записано в GitHub ✓', true);
+    setSyncBadge(true, `подключено: ${cfg.owner}/${cfg.repo}`);
+  }catch(e){
+    console.error(e);
+    flashMsg('pasteMsg', 'Не удалось записать в GitHub: '+e.message, false);
+  }
+}
+
+// ---------- rendering ----------
+function renderStats(){
+  const total = CASES.length;
+  const practiced = CASES.filter(c=>(c.attempts||[]).length>0).length;
+  const allAttempts = CASES.flatMap(c=>c.attempts||[]);
+  const avg = allAttempts.length ? (allAttempts.reduce((s,a)=>s+overallScore(a),0)/allAttempts.length).toFixed(1) : '—';
+  const weakest = CASES.filter(c=>recentAvg(c.id)!==null).sort((a,b)=>recentAvg(a.id)-recentAvg(b.id))[0];
+  document.getElementById('statsRow').innerHTML = `
+    <div class="stat"><div class="num">${practiced}/${total}</div><div class="label">кейсов тронуто</div></div>
+    <div class="stat"><div class="num">${allAttempts.length}</div><div class="label">попыток всего</div></div>
+    <div class="stat"><div class="num">${avg}</div><div class="label">средняя оценка /5</div></div>
+    <div class="stat"><div class="num" style="font-size:14px;line-height:1.3;">${weakest ? weakest.emoji+' '+weakest.title.slice(0,20)+(weakest.title.length>20?'…':'') : '—'}</div><div class="label">самый слабый</div></div>
+  `;
+}
+function renderModes(){
+  const el = document.getElementById('modeSelect');
+  el.innerHTML = MODES.map(m=>`<button class="chip ${m.key===currentMode?'active':''}" data-mode="${m.key}">${m.label}</button>`).join('');
+  el.querySelectorAll('.chip').forEach(btn=>{
+    btn.onclick = ()=>{ currentMode = btn.dataset.mode; renderModes();
+      const timed = currentMode==='timed';
+      document.getElementById('timerBtn60').style.display = timed?'inline-block':'none';
+      document.getElementById('timerBtn180').style.display = timed?'inline-block':'none';
+    };
+  });
+}
+function cardMarkup(c, extraHint){
+  const rec = getRec(c.id);
+  const avg = recentAvg(c.id);
+  const last = lastPracticed(c.id);
+  return `
+    <div class="drawn-card">
+      <div class="drawn-tab" style="background:var(${empVar(c.employer)})">${c.employer || 'личный проект'}<span class="id">${c.id}</span></div>
+      <div class="drawn-body">
+        <h3>${c.emoji} ${c.title}</h3>
+        <div class="meta">${c.year} · попыток: ${rec.attempts.length}${avg!==null?' · ср. балл: '+avg.toFixed(1):''}${last?' · практиковалось '+Math.round(daysSince(last))+' дн. назад':' · ещё не тренировалось'}</div>
+        ${extraHint||''}
+        <div class="brief">${c.brief}</div>
+      </div>
+    </div>
+  `;
+}
+function drawCard(){
+  const pool = getFilteredPool(true);
+  if(!pool.length) return;
+  currentDrawn = weightedDraw(pool);
+  let hint = '';
+  if(currentMode==='question') hint = '<div class="mode-hint">Режим: адаптируй под вопрос интервьюера, а не пересказывай линейно</div>';
+  if(currentMode==='profile') hint = `<div class="mode-hint">Режим: расскажи через призму профиля — ${currentDrawn.profiles.map(p=>p.replace('profile_','')).join(', ')}</div>`;
+  if(currentMode==='timed') hint = '<div class="mode-hint">Режим: запусти таймер ниже перед началом рассказа</div>';
+  if(currentMode==='headline') hint = '<div class="mode-hint">Режим: только headline-предложение, 10 секунд, без истории</div>';
+  document.getElementById('drawArea').innerHTML = cardMarkup(currentDrawn, hint);
+  document.getElementById('pasteZone').style.display = 'block';
+  const timed = currentMode==='timed';
+  document.getElementById('timerBtn60').style.display = timed?'inline-block':'none';
+  document.getElementById('timerBtn180').style.display = timed?'inline-block':'none';
+  renderDims();
+}
+function startTimer(seconds){
+  clearInterval(timerInterval);
+  let remaining = seconds;
+  const disp = document.getElementById('timerDisplay');
+  disp.textContent = formatTime(remaining);
+  timerInterval = setInterval(()=>{
+    remaining--; disp.textContent = formatTime(remaining);
+    if(remaining<=0){ clearInterval(timerInterval); disp.textContent = '⏰ время вышло'; }
+  }, 1000);
+}
+function formatTime(s){ const m=Math.floor(s/60), sec=s%60; return `${m}:${sec.toString().padStart(2,'0')}`; }
+function renderDims(){
+  document.getElementById('dimsArea').innerHTML = DIMS.map(d=>`
+    <div class="dim">
+      <label><span>${d.label}</span><span id="val-${d.key}">3</span></label>
+      <input type="range" min="1" max="5" value="3" id="range-${d.key}" oninput="document.getElementById('val-${d.key}').textContent=this.value">
+    </div>
+  `).join('');
+}
+async function saveManual(){
+  if(!currentDrawn) return;
+  if(!isConfigured()){ flashMsg('pasteMsg','Сначала подключи GitHub в ⚙',false); return; }
+  const attempt = {ts: Date.now()};
+  DIMS.forEach(d=>attempt[d.key] = parseInt(document.getElementById('range-'+d.key).value,10));
+  attempt.note = document.getElementById('noteInput').value.trim();
+  getRec(currentDrawn.id).attempts.push(attempt);
+  await persist('Оценка сохранена');
+  document.getElementById('noteInput').value='';
+  renderStats(); renderCatalog();
+}
+async function parsePaste(){
+  if(!isConfigured()){ flashMsg('pasteMsg','Сначала подключи GitHub в ⚙',false); return; }
+  const raw = document.getElementById('pasteInput').value.trim();
+  const re = /case_id=(\S+)\s+structure=(\d)\s+specificity=(\d)\s+quantification=(\d)\s+naturalness=(\d)\s+relevance=(\d)\s+note="([^"]*)"/;
+  const m = raw.match(re);
+  if(!m){ flashMsg('pasteMsg', 'Не удалось распознать формат строки', false); return; }
+  const [, id, structure, specificity, quantification, naturalness, relevance, note] = m;
+  if(!CASES.find(c=>c.id===id)){ flashMsg('pasteMsg', `Кейс с id "${id}" не найден`, false); return; }
+  getRec(id).attempts.push({ts:Date.now(), structure:+structure, specificity:+specificity, quantification:+quantification, naturalness:+naturalness, relevance:+relevance, note});
+  await persist(`Сохранено для ${id}`);
+  document.getElementById('pasteInput').value='';
+  renderStats(); renderCatalog();
+}
+function flashMsg(elId, text, ok){
+  const el = document.getElementById(elId);
+  el.textContent = text;
+  el.className = 'paste-msg ' + (ok?'ok':'err');
+}
+function getFilteredPool(forDraw){
+  const emp = document.getElementById('employerFilter')?.value || 'all';
+  const type = document.getElementById('typeFilter')?.value || 'all';
+  const q = (document.getElementById('searchInput')?.value || '').toLowerCase();
+  return CASES.filter(c=>{
+    if(emp!=='all' && (c.employer||'Личный')!==emp) return false;
+    if(type!=='all' && c.type!==type) return false;
+    if(!forDraw && q && !c.title.toLowerCase().includes(q)) return false;
+    return true;
+  });
+}
+function renderFilters(){
+  const employers = ['all', ...new Set(CASES.map(c=>c.employer||'Личный'))];
+  document.getElementById('employerFilter').innerHTML = employers.map(e=>`<option value="${e}">${e==='all'?'Все работодатели':e}</option>`).join('');
+}
+function renderCatalog(){
+  let pool = getFilteredPool(false);
+  const sort = document.getElementById('sortFilter').value;
+  pool = [...pool];
+  if(sort==='weak') pool.sort((a,b)=>{
+    const av=recentAvg(a.id), bv=recentAvg(b.id);
+    if(av===null&&bv===null) return 0; if(av===null) return -1; if(bv===null) return 1; return av-bv;
+  });
+  if(sort==='stale') pool.sort((a,b)=>daysSince(lastPracticed(b.id))-daysSince(lastPracticed(a.id)));
+  if(sort==='az') pool.sort((a,b)=>a.title.localeCompare(b.title,'ru'));
+  if(sort==='year') pool.sort((a,b)=>a.year.localeCompare(b.year));
+
+  const html = '<div class="catalog">' + pool.map(c=>{
+    const avg = recentAvg(c.id);
+    const rec = getRec(c.id);
+    const cls = avg===null ? '' : avg>=4 ? 'strong' : avg<3 ? 'weak' : '';
+    const badgeCls = avg===null ? 'new' : avg>=4 ? 'strong' : avg<3 ? 'weak' : 'new';
+    const badgeText = avg===null ? 'новый' : avg.toFixed(1);
+    const last = lastPracticed(c.id);
+    return `
+      <div class="cat-card ${cls}" data-id="${c.id}" style="${cls?'':'border-left-color:var('+empVar(c.employer)+')'}">
+        <div class="cat-top">
+          <div class="cat-title">${c.emoji} ${c.title}</div>
+          <div class="score-badge ${badgeCls}">${badgeText}</div>
+        </div>
+        <div class="cat-emp">${c.employer||'личный'} · ${c.year}</div>
+        <div class="cat-foot">${rec.attempts.length} попыт. ${last ? '· '+Math.round(daysSince(last))+' дн. назад' : '· не тренировалось'}</div>
+      </div>
+    `;
+  }).join('') + '</div>';
+  document.getElementById('catalogWrap').innerHTML = html;
+  document.querySelectorAll('.cat-card').forEach(card=>{
+    card.onclick = ()=>{
+      const c = CASES.find(x=>x.id===card.dataset.id);
+      currentDrawn = c; currentMode = 'roulette'; renderModes();
+      document.getElementById('drawArea').innerHTML = cardMarkup(c, '');
+      document.getElementById('pasteZone').style.display = 'block';
+      renderDims();
+      window.scrollTo({top:0, behavior:'smooth'});
+    };
+  });
+}
+
+function initSettingsPanel(){
+  const panel = document.getElementById('settingsPanel');
+  document.getElementById('settingsBtn').onclick = ()=>panel.classList.toggle('open');
+  document.getElementById('cfgSaveBtn').onclick = async ()=>{
+    cfg = {
+      owner: document.getElementById('cfgOwner').value.trim(),
+      repo: document.getElementById('cfgRepo').value.trim(),
+      branch: document.getElementById('cfgBranch').value.trim() || 'main',
+      path: document.getElementById('cfgPath').value.trim() || 'data.json',
+      token: document.getElementById('cfgToken').value.trim()
+    };
+    saveCfg();
+    panel.classList.remove('open');
+    setSyncBadge(false, 'подключаюсь...');
+    await loadAll();
+    renderFilters(); renderStats(); renderCatalog();
+    document.getElementById('saveManualBtn').disabled = !isConfigured();
+  };
+  document.getElementById('cfgClearBtn').onclick = ()=>{
+    clearCfg();
+    ['cfgOwner','cfgRepo','cfgPath','cfgToken'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('cfgBranch').value='main';
+    setSyncBadge(false, 'не подключено');
+  };
+}
+
+async function init(){
+  initSettingsPanel();
+  renderModes();
+  await loadAll();
+  if(!CASES.length){
+    document.getElementById('settingsPanel').classList.add('open');
+  }
+  renderFilters();
+  renderStats();
+  renderCatalog();
+  renderDims();
+  document.getElementById('saveManualBtn').disabled = !isConfigured();
+
+  document.getElementById('drawBtn').onclick = drawCard;
+  document.getElementById('parseBtn').onclick = parsePaste;
+  document.getElementById('saveManualBtn').onclick = saveManual;
+  document.getElementById('timerBtn60').onclick = ()=>startTimer(60);
+  document.getElementById('timerBtn180').onclick = ()=>startTimer(180);
+  document.getElementById('employerFilter').onchange = renderCatalog;
+  document.getElementById('typeFilter').onchange = renderCatalog;
+  document.getElementById('sortFilter').onchange = renderCatalog;
+  document.getElementById('searchInput').oninput = renderCatalog;
+}
+init();
+</script>
