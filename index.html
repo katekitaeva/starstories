@@ -69,7 +69,11 @@
   .card-outline{min-height:150px;display:flex;align-items:center;justify-content:center;}
   .drawn-card{width:100%;background:var(--paper-raised);border:2px solid var(--ink);border-radius:4px;overflow:hidden;position:relative;}
   .drawn-tab{padding:6px 16px;font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:0.5px;color:var(--paper);}
-  .drawn-body{padding:18px 20px 20px;}
+  .drawn-flex{display:flex;}
+  .drawn-cover{position:relative;width:150px;flex:0 0 150px;aspect-ratio:1/1;overflow:hidden;background:var(--rule);display:flex;align-items:center;justify-content:center;box-sizing:border-box;}
+  .drawn-cover img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;}
+  .drawn-cover .cover-emoji{font-size:38px;position:relative;z-index:0;}
+  .drawn-body{padding:18px 20px 20px;flex:1;min-width:0;}
   .drawn-card h3{font-family:var(--serif);font-size:21px;margin:0 0 4px;font-weight:700;line-height:1.3;}
   .drawn-card .meta{font-family:var(--mono);font-size:11px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:12px;}
   .drawn-card .brief{color:var(--ink);font-size:15px;line-height:1.55;margin-bottom:6px;}
@@ -106,10 +110,14 @@
   .search{flex:1;min-width:160px;}
 
   .catalog{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px;margin-bottom:6px;}
-  .cat-card{background:var(--paper-raised);border:1px solid var(--rule);border-left:4px solid var(--rule-strong);border-radius:4px;padding:12px 14px;cursor:pointer;}
+  .cat-card{background:var(--paper-raised);border:1px solid var(--rule);border-left:4px solid var(--rule-strong);border-radius:4px;overflow:hidden;cursor:pointer;}
   .cat-card:hover{background:var(--rule);}
   .cat-card.strong{border-left-color:var(--good);}
   .cat-card.weak{border-left-color:var(--bad);}
+  .cat-cover{position:relative;width:100%;aspect-ratio:1/1;overflow:hidden;background:var(--rule);display:flex;align-items:center;justify-content:center;box-sizing:border-box;}
+  .cat-cover img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;}
+  .cat-cover .cover-emoji{font-size:32px;position:relative;z-index:0;}
+  .cat-info{padding:12px 14px;}
   .cat-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;}
   .cat-title{font-family:var(--sans);font-size:13.5px;font-weight:700;line-height:1.3;}
   .cat-emp{font-family:var(--mono);font-size:10px;color:var(--ink-soft);text-transform:uppercase;margin-top:6px;}
@@ -140,6 +148,8 @@
     .settings-grid{grid-template-columns:1fr;}
     .dims{grid-template-columns:1fr 1fr;gap:10px;}
     .drawn-body{padding:16px 14px 18px;}
+    .drawn-flex{flex-direction:column;}
+    .drawn-cover{width:100%;flex:0 0 auto;aspect-ratio:16/9;}
     .drawn-card h3{font-size:19px;}
     .drawn-card .brief{font-size:14px;}
     .btn{font-size:13.5px;padding:10px 16px;width:100%;justify-content:center;}
@@ -441,14 +451,21 @@ function cardMarkup(c, extraHint){
   const rec = getRec(c.id);
   const avg = recentAvg(c.id);
   const last = lastPracticed(c.id);
+  const colorVar = empVar(c.employer);
   return `
     <div class="drawn-card">
-      <div class="drawn-tab" style="background:var(${empVar(c.employer)})">${c.employer || 'личный проект'}<span class="id">${c.id}</span></div>
-      <div class="drawn-body">
-        <h3>${c.emoji} ${c.title}</h3>
-        <div class="meta">${c.year} · попыток: ${rec.attempts.length}${avg!==null?' · ср. балл: '+avg.toFixed(1):''}${last?' · практиковалось '+Math.round(daysSince(last))+' дн. назад':' · ещё не тренировалось'}</div>
-        ${extraHint||''}
-        <div class="brief">${c.brief}</div>
+      <div class="drawn-tab" style="background:var(${colorVar})">${c.employer || 'личный проект'}<span class="id">${c.id}</span></div>
+      <div class="drawn-flex">
+        <div class="drawn-cover" style="border:3px solid var(${colorVar})">
+          <span class="cover-emoji">${c.emoji}</span>
+          <img src="images/${c.id}.png" alt="" onerror="this.remove()">
+        </div>
+        <div class="drawn-body">
+          <h3>${c.emoji} ${c.title}</h3>
+          <div class="meta">${c.year} · попыток: ${rec.attempts.length}${avg!==null?' · ср. балл: '+avg.toFixed(1):''}${last?' · практиковалось '+Math.round(daysSince(last))+' дн. назад':' · ещё не тренировалось'}</div>
+          ${extraHint||''}
+          <div class="brief">${c.brief}</div>
+        </div>
       </div>
     </div>
   `;
@@ -551,14 +568,21 @@ function renderCatalog(){
     const badgeCls = avg===null ? 'new' : avg>=4 ? 'strong' : avg<3 ? 'weak' : 'new';
     const badgeText = avg===null ? 'новый' : avg.toFixed(1);
     const last = lastPracticed(c.id);
+    const colorVar = empVar(c.employer);
     return `
-      <div class="cat-card ${cls}" data-id="${c.id}" style="${cls?'':'border-left-color:var('+empVar(c.employer)+')'}">
-        <div class="cat-top">
-          <div class="cat-title">${c.emoji} ${c.title}</div>
-          <div class="score-badge ${badgeCls}">${badgeText}</div>
+      <div class="cat-card ${cls}" data-id="${c.id}">
+        <div class="cat-cover" style="border-bottom:3px solid var(${colorVar})">
+          <span class="cover-emoji">${c.emoji}</span>
+          <img src="images/${c.id}.png" alt="" onerror="this.remove()">
         </div>
-        <div class="cat-emp">${c.employer||'личный'} · ${c.year}</div>
-        <div class="cat-foot">${rec.attempts.length} попыт. ${last ? '· '+Math.round(daysSince(last))+' дн. назад' : '· не тренировалось'}</div>
+        <div class="cat-info">
+          <div class="cat-top">
+            <div class="cat-title">${c.emoji} ${c.title}</div>
+            <div class="score-badge ${badgeCls}">${badgeText}</div>
+          </div>
+          <div class="cat-emp">${c.employer||'личный'} · ${c.year}</div>
+          <div class="cat-foot">${rec.attempts.length} попыт. ${last ? '· '+Math.round(daysSince(last))+' дн. назад' : '· не тренировалось'}</div>
+        </div>
       </div>
     `;
   }).join('') + '</div>';
