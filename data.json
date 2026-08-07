@@ -157,19 +157,18 @@
     "attempts": []
   },
   {
-    "id": "case_budget_management",
+    "id": "case_team_entry",
     "year": "2024-09",
     "employer": "ГПБ",
-    "emoji": "💰",
-    "title": "ФОТ в Jira: от Excel к реальному времени",
+    "emoji": "🧠",
+    "title": "Знакомство с PO: техника 1-2-4-6",
     "profiles": [
-      "profile_DeliveryLead",
-      "profile_Methodologist",
-      "profile_TransformationLead",
+      "profile_AgileCoach",
+      "profile_ScrumMaster",
       "profile_ProjectManager"
     ],
-    "type": "system",
-    "brief": "Спроектировала учёт ФОТ в Jira вместо ручного Excel, сократив время получения данных с недели до 2 минут; практика масштабирована на 40 стримов банка.",
+    "type": "people",
+    "brief": "Спроектировала сессию по технике 1-2-4-6 для нового PO и команды, зафиксировав ожидания в Confluence до начала конфликтов; предсказуемость выросла с 60% до 85%.",
     "attempts": []
   },
   {
@@ -188,18 +187,19 @@
     "attempts": []
   },
   {
-    "id": "case_team_entry",
+    "id": "case_budget_management",
     "year": "2024-09",
     "employer": "ГПБ",
-    "emoji": "🧠",
-    "title": "Знакомство с PO: техника 1-2-4-6",
+    "emoji": "💰",
+    "title": "ФОТ в Jira: от Excel к реальному времени",
     "profiles": [
-      "profile_AgileCoach",
-      "profile_ScrumMaster",
+      "profile_DeliveryLead",
+      "profile_Methodologist",
+      "profile_TransformationLead",
       "profile_ProjectManager"
     ],
-    "type": "people",
-    "brief": "Спроектировала сессию по технике 1-2-4-6 для нового PO и команды, зафиксировав ожидания в Confluence до начала конфликтов; предсказуемость выросла с 60% до 85%.",
+    "type": "system",
+    "brief": "Спроектировала учёт ФОТ в Jira вместо ручного Excel, сократив время получения данных с недели до 2 минут; практика масштабирована на 40 стримов банка.",
     "attempts": []
   },
   {
@@ -218,6 +218,24 @@
     ],
     "type": "system",
     "brief": "Разработала минималистичную (2 вопроса) анонимную методику оценки эффективности коуча, протестировала на себе на 60 респондентах и масштабировала на всех Scrum-мастеров.",
+    "attempts": []
+  },
+  {
+    "id": "case_incident_management",
+    "year": "2024-12",
+    "employer": "ГПБ",
+    "emoji": "📇",
+    "title": "Управление инцидентами в стриме Daily Banking",
+    "profiles": [
+      "profile_AgileCoach",
+      "profile_ScrumMaster",
+      "profile_TransformationLead",
+      "profile_DeliveryLead",
+      "profile_Methodologist",
+      "profile_ProjectManager"
+    ],
+    "type": "mixed",
+    "brief": "В стриме Daily Banking (120+ человек, 8 команд) бэклог инцидентов достиг 217 задач, часть из них висела годами. Ежемесячно поступало ~30 новых инцидентов, 65% из которых повторялись. 2-я линия поддерж…",
     "attempts": []
   },
   {
@@ -295,22 +313,6 @@
     ]
   },
   {
-    "id": "case_migration_legacy",
-    "year": "2025-06",
-    "employer": "ГПБ",
-    "emoji": "🏗️",
-    "title": "Миграция 5NT в микросервисы с лимитом 20%",
-    "profiles": [
-      "profile_ProjectManager",
-      "profile_DeliveryLead",
-      "profile_TransformationLead",
-      "profile_Methodologist"
-    ],
-    "type": "system",
-    "brief": "Провела миграцию бизнес-логики 5 команд из легаси-платформы в микросервисы через MoSCoW с жёстким лимитом 20% ёмкости на команду.",
-    "attempts": []
-  },
-  {
     "id": "case_vendor_management",
     "year": "2025-06",
     "employer": "ГПБ",
@@ -324,6 +326,22 @@
     ],
     "type": "system",
     "brief": "Встроила внешнего вендора в единый портфельный бэклог с финансовой прозрачностью, сократив TTM с 8 до 2,5 месяцев.",
+    "attempts": []
+  },
+  {
+    "id": "case_migration_legacy",
+    "year": "2025-06",
+    "employer": "ГПБ",
+    "emoji": "🏗️",
+    "title": "Миграция 5NT в микросервисы с лимитом 20%",
+    "profiles": [
+      "profile_ProjectManager",
+      "profile_DeliveryLead",
+      "profile_TransformationLead",
+      "profile_Methodologist"
+    ],
+    "type": "system",
+    "brief": "Провела миграцию бизнес-логики 5 команд из легаси-платформы в микросервисы через MoSCoW с жёстким лимитом 20% ёмкости на команду.",
     "attempts": []
   },
   {
@@ -399,22 +417,6 @@
     ]
   },
   {
-    "id": "case_process_design_rollout",
-    "year": "2025-11",
-    "employer": "Криптонит",
-    "emoji": "🧩",
-    "title": "Единая модель бэклогов в 7 стримах",
-    "profiles": [
-      "profile_TransformationLead",
-      "profile_DeliveryLead",
-      "profile_AgileCoach",
-      "profile_ProjectManager"
-    ],
-    "type": "system",
-    "brief": "Унифицировала 7 разнородных Jira-конфигураций через ТЗ, песочницу «Энигма-Град» и обучение — синхронизации сократились с 90-120 до 45 минут.",
-    "attempts": []
-  },
-  {
     "id": "case_portfolio_unification",
     "year": "2025-12",
     "employer": "Криптонит",
@@ -443,29 +445,21 @@
     ]
   },
   {
-    "id": "case_conflict_resolution",
+    "id": "case_release_standardization",
     "year": "2026-01",
     "employer": "Криптонит",
-    "emoji": "⚔️",
-    "title": "Публичная атака CTO на Q&A с 70 участниками",
+    "emoji": "🚀",
+    "title": "Выравнивание практики релизов в 20 командах",
     "profiles": [
-      "profile_AgileCoach",
       "profile_TransformationLead",
-      "profile_ProjectManager"
+      "profile_DeliveryLead",
+      "profile_ProjectManager",
+      "profile_Methodologist",
+      "profile_AgileCoach"
     ],
-    "type": "people",
-    "brief": "Перевела публичную критику CTO в приватный диалог, признала ограничения MVP-подхода и предложила дорожную карту — запуск квартального планирования не был заблокирован.",
-    "attempts": [
-      {
-        "ts": 1785471820538,
-        "structure": 3,
-        "specificity": 3,
-        "quantification": 3,
-        "naturalness": 3,
-        "relevance": 3,
-        "note": "зафиксируй 2-3 цифры (70 участников, 14 эпиков, «система работает и после моего ухода») и вставляй их в Result вслух, а не держи в голове — без них рассказ звучит как мнение, а не как факт."
-      }
-    ]
+    "type": "mixed",
+    "brief": "Взяла практику 3 передовых команд за эталон и через публичную прозрачность (а не директиву) масштабировала стандарт релизов на 20 команд и 10 ЦОДов.",
+    "attempts": []
   },
   {
     "id": "case_quarterly_planning_system",
@@ -494,21 +488,29 @@
     ]
   },
   {
-    "id": "case_release_standardization",
+    "id": "case_conflict_resolution",
     "year": "2026-01",
     "employer": "Криптонит",
-    "emoji": "🚀",
-    "title": "Выравнивание практики релизов в 20 командах",
+    "emoji": "⚔️",
+    "title": "Публичная атака CTO на Q&A с 70 участниками",
     "profiles": [
+      "profile_AgileCoach",
       "profile_TransformationLead",
-      "profile_DeliveryLead",
-      "profile_ProjectManager",
-      "profile_Methodologist",
-      "profile_AgileCoach"
+      "profile_ProjectManager"
     ],
-    "type": "mixed",
-    "brief": "Взяла практику 3 передовых команд за эталон и через публичную прозрачность (а не директиву) масштабировала стандарт релизов на 20 команд и 10 ЦОДов.",
-    "attempts": []
+    "type": "people",
+    "brief": "Перевела публичную критику CTO в приватный диалог, признала ограничения MVP-подхода и предложила дорожную карту — запуск квартального планирования не был заблокирован.",
+    "attempts": [
+      {
+        "ts": 1785471820538,
+        "structure": 3,
+        "specificity": 3,
+        "quantification": 3,
+        "naturalness": 3,
+        "relevance": 3,
+        "note": "зафиксируй 2-3 цифры (70 участников, 14 эпиков, «система работает и после моего ухода») и вставляй их в Result вслух, а не держи в голове — без них рассказ звучит как мнение, а не как факт."
+      }
+    ]
   },
   {
     "id": "case_ai_response_system",
