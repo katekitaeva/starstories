@@ -386,7 +386,17 @@
     ],
     "type": "mixed",
     "brief": "Внедрила Burn-down и Jira Structure вместо PowerPoint-отчётов, вскрыла скрытый 20%-й недельный рост скоупа и зафиксировала MVP для демо, критичного для финансирования.",
-    "attempts": []
+    "attempts": [
+      {
+        "ts": 1786084767799,
+        "structure": 3,
+        "specificity": 3,
+        "quantification": 5,
+        "naturalness": 3,
+        "relevance": 3,
+        "note": "проговори явно финал — \"демо сдали, финансирование получили\" — не дай истории оборваться на моменте фиксации скоупа."
+      }
+    ]
   },
   {
     "id": "case_process_design_rollout",
