@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Дашборд откликов на вакансии</title>
+<style>
+  :root {
+    --bg: #faf9f7;
+    --card-bg: #ffffff;
+    --border: #e5e1da;
+    --text: #2b2825;
+    --muted: #7a7369;
+    --accent: #b3552e;
+    --accent-soft: #f3e3d8;
+    --good: #4c7a4c;
+    --good-soft: #e4efe0;
+    --warn: #a97c1f;
+    --warn-soft: #f6ecd6;
+    --bad: #a13a3a;
+    --bad-soft: #f5e0de;
+    --content-max: 1140px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 24px 16px;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  .page {
+    max-width: var(--content-max);
+    margin: 0 auto;
+  }
+  h1 {
+    font-size: 20px;
+    margin: 0 0 4px 0;
+  }
+  .subtitle {
+    color: var(--muted);
+    font-size: 13px;
+    margin-bottom: 0;
+  }
+
+  /* ---------- header block ---------- */
+  .header-block {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .header-main {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .header-purpose {
+    display: none;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--muted);
+  }
+  .header-purpose .label {
+    font-size: 11px;
+    color: var(--accent);
+    font-weight: 600;
+    margin-bottom: 6px;
+    display: block;
+  }
+  .header-purpose a {
+    color: var(--accent);
+  }
+  @media (min-width: 900px) {
+    .header-block { grid-template-columns: 2fr 1fr; align-items: stretch; }
+    .header-purpose { display: block; }
+  }
+
+  .refresh-btn {
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--card-bg);
+    color: var(--text);
+    font-size: 13px;
+    cursor: pointer;
+  }
+  .refresh-btn:hover { background: #f3efe8; }
+
+  /* ---------- funnel block ---------- */
+  .funnel-block {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  @media (min-width: 900px) {
+    .funnel-block { grid-template-columns: 3fr 2fr; align-items: start; }
+  }
+  .funnel-col, .funnel-explain {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 20px;
+  }
+  .funnel-explain { display: none; }
+  @media (min-width: 900px) {
+    .funnel-explain { display: block; }
+  }
+  .funnel-col h2, .funnel-explain h2 {
+    font-size: 14px;
+    margin: 0 0 14px 0;
+    color: var(--muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+  .active-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    border-radius: 999px;
+    padding: 6px 14px;
+    font-size: 13px;
+    margin-bottom: 18px;
+  }
+  .active-badge .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+  .active-badge b { font-size: 14px; }
+
+  .funnel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .funnel-stage {
+    width: 100%;
+    max-width: 420px;
+    background: var(--accent);
+    color: #fff;
+    padding: 14px 14px 20px 14px;
+    text-align: center;
+  }
+  .funnel-stage .stage-name {
+    font-size: 12px;
+    opacity: 0.9;
+    margin-bottom: 2px;
+  }
+  .funnel-stage .stage-num {
+    font-size: 20px;
+    font-weight: 700;
+  }
+  .funnel-stage .stage-pct {
+    font-size: 11px;
+    opacity: 0.85;
+    margin-top: 2px;
+  }
+  .funnel-stage:first-child { border-radius: 8px 8px 0 0; }
+  .funnel-stage:last-child { border-radius: 0 0 8px 8px; padding-bottom: 14px; }
+  .funnel-stage:nth-child(2) { background: #bf6a3f; }
+  .funnel-stage:nth-child(3) { background: #cc8354; }
+  .funnel-stage:nth-child(4) { background: #d99c6c; }
+
+  .funnel-explain p {
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--text);
+    margin: 0 0 12px 0;
+  }
+  .funnel-explain .legend {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 14px;
+    border-top: 1px solid var(--border);
+    padding-top: 12px;
+  }
+  .funnel-explain .legend-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .funnel-explain .legend-swatch {
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+
+  /* ---------- month breakdown ---------- */
+  .bar-track {
+    flex: 1;
+    background: #efece6;
+    border-radius: 6px;
+    height: 10px;
+    overflow: hidden;
+  }
+  .month-row {
+    margin-bottom: 14px;
+  }
+  .month-row .month-top {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+  }
+  .month-row .name {
+    width: 90px;
+    flex-shrink: 0;
+  }
+  .month-row .count {
+    width: 30px;
+    text-align: right;
+    color: var(--muted);
+    flex-shrink: 0;
+  }
+  .bar-fill-wrap {
+    display: flex;
+    height: 100%;
+  }
+  .bar-track.tall {
+    height: 22px;
+    border-radius: 6px;
+  }
+  .bar-seg {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 600;
+    overflow: hidden;
+  }
+  .bar-seg.closed { background: #5c5650; }
+  .bar-seg.active { background: var(--good); }
+  .month-row.total-row {
+    margin-bottom: 18px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .month-row.total-row .name {
+    font-weight: 700;
+    color: var(--text);
+  }
+  .month-row.total-row .count {
+    font-weight: 700;
+    color: var(--text);
+  }
+  .profile-seg {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 600;
+    overflow: hidden;
+  }
+  .funnel-explain .legend.legend-wrap {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+  .state-msg {
+    padding: 40px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 14px;
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <div class="header-block">
+    <div class="header-main">
+      <div>
+        <h1>Дашборд откликов на вакансии</h1>
+        <div class="subtitle" id="subtitle">Загрузка данных…</div>
+      </div>
+      <button class="refresh-btn" id="refreshBtn">↻ Обновить</button>
+    </div>
+    <div class="header-purpose" id="headerPurpose">
+      <span class="label">О чём этот дашборд</span>
+      Этот дашборд — верхнеуровневый срез моего процесса поиска работы: сколько и куда я откликаюсь,
+      с каким позиционированием (Profile) и резюме, и какие статусы получают эти отклики.
+      Данные подгружаются в режиме реального времени из
+      <a href="https://docs.google.com/spreadsheets/d/1RvbQOqr1t8dEr28RW7JadidNbjVBSzdE8_qFiPGpOAk/edit?usp=sharing" target="_blank" rel="noopener">Google-таблицы с историей откликов</a>.
+      Здесь я слежу за динамикой и ищу закономерности в процессе, а не веду детальный учёт
+      по каждой отдельной вакансии.
+    </div>
+  </div>
+
+  <div id="content">
+    <div class="state-msg">Загружаю данные из таблицы…</div>
+  </div>
+
+</div>
+
+<script>
+const SHEET_ID = "1RvbQOqr1t8dEr28RW7JadidNbjVBSzdE8_qFiPGpOAk";
+const GID = "702907983";
+
+// Точные названия колонок в листе (без эвристик/алиасов)
+const COLUMNS = {
+  directory: "Directory",
+  domain: "Домен",
+  date: "Appy date",
+  status: "Status",
+  profile: "Profile",
+  resume: "Resume"
+};
+
+// Статусы, из которых складывается воронка (сравнение без учёта регистра/пробелов)
+const FUNNEL_STATUSES = {
+  interviewPotential: ["to apply", "applyed", "resume is checked", "screening", "interview", "refused (after interview)", "job offer!!!"],
+  interviewReal: ["screening", "interview", "refused (after interview)", "job offer!!!"],
+  offer: ["job offer!!!"]
+};
+const ACTIVE_STATUS = "applyed";
+
+// Отклики "закрытые" (по ним уже есть финальное решение) vs "в работе" (ещё в процессе)
+const RESOLUTION_STATUSES = {
+  closed: ["refused (no interview)", "refused (after interview)", "vacancy is archived", "job offer!!!"],
+  active: ["to apply", "applyed", "resume is checked", "screening", "interview"]
+};
+
+function normStatus(s) {
+  return (s || "").toString().trim().toLowerCase();
+}
+
+function parseDateCell(raw, formatted) {
+  if (typeof raw === "string") {
+    const m = raw.match(/^Date\((\d+),(\d+),(\d+)/);
+    if (m) return new Date(Number(m[1]), Number(m[2]), Number(m[3]));
+  }
+  if (raw instanceof Date) return raw;
+  const candidates = [formatted, raw];
+  for (const c of candidates) {
+    if (!c) continue;
+    const s = String(c).trim();
+    let dm = s.match(/^(\d{1,2})[.\/](\d{1,2})[.\/](\d{4})$/);
+    if (dm) return new Date(Number(dm[3]), Number(dm[2]) - 1, Number(dm[1]));
+    dm = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+    if (dm) return new Date(Number(dm[1]), Number(dm[2]) - 1, Number(dm[3]));
+    const parsed = new Date(s);
+    if (!isNaN(parsed.getTime())) return parsed;
+  }
+  return null;
+}
+
+const MONTH_NAMES_RU = ["янв", "фев", "мар", "апр", "май", "июн", "июл", "авг", "сен", "окт", "ноя", "дек"];
+
+function findColumn(headers, exactName) {
+  return headers.find(h => h.trim() === exactName) || null;
+}
+
+function humanizeProfile(raw) {
+  if (!raw) return "Не определено";
+  let s = String(raw).trim();
+  s = s.replace(/^\d+_?/, "").replace(/^profile_/i, "");
+  s = s.replace(/([A-ZА-Я]+)([A-ZА-Я][a-zа-я])/g, "$1 $2");
+  s = s.replace(/([a-zа-я])([A-ZА-Я])/g, "$1 $2");
+  s = s.replace(/_/g, " ").trim();
+  return s || "Не определено";
+}
+
+// Фиксированные цвета и порядок профилей (заданы вручную, не по частоте в данных)
+const PROFILE_COLOR_MAP = {
+  "Agile Coach": "#1f4d33",
+  "Scrum Master": "#8fc98f",
+  "Transformation Lead": "#a8b93c",
+  "Delivery Lead": "#3a6ea5",
+  "AI Integrator": "#c9c5bd",
+  "Methodologist": "#8a6d1f",
+  "Project Manager": "#4a4540",
+  "Не определено": "#1a1a1a"
+};
+const PROFILE_ORDER = ["Agile Coach", "Scrum Master", "Transformation Lead", "Delivery Lead", "AI Integrator", "Methodologist", "Project Manager", "Не определено"];
+// светлые фоны (Scrum Master, Transformation Lead, AI Integrator) требуют тёмного текста для контраста
+const PROFILE_TEXT_COLOR_MAP = {
+  "Scrum Master": "#1f3d1f",
+  "Transformation Lead": "#3a3a10",
+  "AI Integrator": "#3a3a3a"
+};
+// запасная палитра — на случай, если в данных появится профиль вне списка выше
+const PROFILE_PALETTE = ["#b3552e", "#4c7a4c", "#3f6b8f", "#a97c1f", "#7a5ea8", "#a13a3a", "#2f7d76", "#8f8f3f"];
+
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+function render(rows, headers) {
+  const subtitle = document.getElementById("subtitle");
+  const content = document.getElementById("content");
+
+  if (!rows.length) {
+    subtitle.textContent = "Данные не найдены";
+    content.innerHTML = '<div class="state-msg">В таблице нет строк с данными.</div>';
+    return;
+  }
+
+  const directoryCol = findColumn(headers, COLUMNS.directory);
+  const domainCol = findColumn(headers, COLUMNS.domain);
+  const dateCol = findColumn(headers, COLUMNS.date);
+  const statusCol = findColumn(headers, COLUMNS.status);
+  const profileCol = findColumn(headers, COLUMNS.profile);
+  const resumeCol = findColumn(headers, COLUMNS.resume);
+
+  subtitle.textContent = `Всего откликов: ${rows.length} · обновлено ${new Date().toLocaleString("ru-RU")}`;
+
+  // ---- статистика по месяцам ----
+  const monthCounts = {};
+  const monthClosed = {};
+  const monthActive = {};
+  if (dateCol) {
+    rows.forEach(r => {
+      const raw = r.__raw ? r.__raw[dateCol] : null;
+      const d = parseDateCell(raw, r[dateCol]);
+      if (d && !isNaN(d.getTime())) {
+        const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+        monthCounts[key] = (monthCounts[key] || 0) + 1;
+        const s = statusCol ? normStatus(r[statusCol]) : "";
+        if (RESOLUTION_STATUSES.closed.includes(s)) monthClosed[key] = (monthClosed[key] || 0) + 1;
+        if (RESOLUTION_STATUSES.active.includes(s)) monthActive[key] = (monthActive[key] || 0) + 1;
+      }
+    });
+  }
+  const sortedMonths = Object.entries(monthCounts).sort((a, b) => a[0].localeCompare(b[0]));
+  const maxMonthCount = sortedMonths.length ? Math.max(...sortedMonths.map(m => m[1])) : 1;
+
+  function formatMonthLabel(key) {
+    const [y, m] = key.split("-");
+    return `${MONTH_NAMES_RU[Number(m) - 1]} ${y}`;
+  }
+
+  // ---- профили по месяцам ----
+  const profileTotals = {};
+  const monthProfileCounts = {}; // { monthKey: { profileName: count } }
+  if (profileCol && dateCol) {
+    rows.forEach(r => {
+      const raw = r.__raw ? r.__raw[dateCol] : null;
+      const d = parseDateCell(raw, r[dateCol]);
+      if (!d || isNaN(d.getTime())) return;
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+      const profile = humanizeProfile(r[profileCol]);
+      profileTotals[profile] = (profileTotals[profile] || 0) + 1;
+      if (!monthProfileCounts[key]) monthProfileCounts[key] = {};
+      monthProfileCounts[key][profile] = (monthProfileCounts[key][profile] || 0) + 1;
+    });
+  }
+  const seenProfiles = new Set(Object.keys(profileTotals));
+  const profileOrder = PROFILE_ORDER.filter(name => seenProfiles.has(name));
+  // на случай, если в данных встретится профиль вне заданного списка — добавляем его в конец
+  Object.keys(profileTotals).forEach(name => { if (!PROFILE_ORDER.includes(name)) profileOrder.push(name); });
+  const profileColor = {};
+  profileOrder.forEach((name, i) => {
+    profileColor[name] = PROFILE_COLOR_MAP[name] || PROFILE_PALETTE[i % PROFILE_PALETTE.length];
+  });
+
+  // ---- воронка ----
+  let level1 = rows.length;
+  let level2 = 0, level3 = 0, level4 = 0, activeCount = 0;
+  if (statusCol) {
+    rows.forEach(r => {
+      const s = normStatus(r[statusCol]);
+      if (FUNNEL_STATUSES.interviewPotential.includes(s)) level2++;
+      if (FUNNEL_STATUSES.interviewReal.includes(s)) level3++;
+      if (FUNNEL_STATUSES.offer.includes(s)) level4++;
+      if (s === ACTIVE_STATUS) activeCount++;
+    });
+  }
+  const pct = (a, b) => (b > 0 ? Math.round((a / b) * 100) : 0);
+  // Ширина ступеней задаётся по рангу этапа (фиксированное сужение), а не строго
+  // пропорционально цифрам — иначе при большом разбросе значений (159 → 1) форма
+  // ломается визуально. Точные числа и проценты всё равно показаны текстом.
+  const RANK_WIDTHS = [100, 76, 52, 28];
+  const stages = [
+    { name: "Всего откликов", num: level1, pctOfPrev: null },
+    { name: "Интервью (потенциальные + реальные)", num: level2, pctOfPrev: pct(level2, level1) },
+    { name: "Интервью реальные", num: level3, pctOfPrev: pct(level3, level2) },
+    { name: "Предложение о работе", num: level4, pctOfPrev: pct(level4, level3) }
+  ];
+  const TAIL_WIDTH = 16; // ширина "носика" воронки под последним этапом
+  stages.forEach((st, i) => {
+    const top = RANK_WIDTHS[i];
+    const bottom = i < stages.length - 1 ? RANK_WIDTHS[i + 1] : TAIL_WIDTH;
+    const topInset = (100 - top) / 2;
+    const bottomInset = (100 - bottom) / 2;
+    st.clipPath = `polygon(${topInset}% 0, ${100 - topInset}% 0, ${100 - bottomInset}% 100%, ${bottomInset}% 100%)`;
+  });
+
+  let html = "";
+
+  // funnel block
+  html += '<div class="funnel-block">';
+  html += '<div class="funnel-col"><h2>Воронка откликов</h2>';
+  html += `<div class="active-badge"><span class="dot"></span>Сейчас в работе: <b>${activeCount}</b> ${activeCount === 1 ? "отклик ожидает" : "откликов ожидают"} решения</div>`;
+  html += '<div class="funnel">';
+  stages.forEach(st => {
+    html += `
+      <div class="funnel-stage" style="clip-path:${st.clipPath}">
+        <div class="stage-name">${escapeHtml(st.name)}</div>
+        <div class="stage-num">${st.num}</div>
+        ${st.pctOfPrev !== null ? `<div class="stage-pct">${st.pctOfPrev}% от предыдущего этапа</div>` : ""}
+      </div>`;
+  });
+  html += '</div>'; // .funnel
+  html += '</div>'; // .funnel-col
+
+  html += `
+    <div class="funnel-explain">
+      <h2>Что это значит</h2>
+      <p>Воронка показывает, как отклики постепенно проходят путь от «отправила резюме» до «получила предложение о работе».
+      Каждый следующий уровень — это часть предыдущего: например, «Интервью реальные» — это те отклики
+      из уровня «Интервью (потенциальные + реальные)», где интервью действительно состоялось или ещё может состояться.</p>
+      <p>Чем выше проценты между уровнями, тем эффективнее проходит поиск на этом этапе. Например, если из 100 откликов
+      только 10 доходят до интервью — это узкое место на входе (например, резюме или подбор вакансий). А если из 10 интервью
+      8 заканчиваются предложением — это сильный этап собеседований.</p>
+      <div class="legend">
+        <div class="legend-row"><span class="legend-swatch" style="background:var(--accent)"></span>Всего откликов</div>
+        <div class="legend-row"><span class="legend-swatch" style="background:#bf6a3f"></span>Интервью (потенциальные + реальные)</div>
+        <div class="legend-row"><span class="legend-swatch" style="background:#cc8354"></span>Интервью реальные</div>
+        <div class="legend-row"><span class="legend-swatch" style="background:#d99c6c"></span>Предложение о работе</div>
+      </div>
+    </div>`;
+  html += '</div>'; // .funnel-block
+
+  // month breakdown
+  if (sortedMonths.length) {
+    html += '<div class="funnel-block">';
+    html += '<div class="funnel-col"><h2>По месяцам (дата подачи)</h2>';
+    sortedMonths.forEach(([key, count]) => {
+      const totalPct = Math.round((count / maxMonthCount) * 100);
+      const closed = monthClosed[key] || 0;
+      const active = monthActive[key] || 0;
+      const closedShare = count > 0 ? (closed / count) * 100 : 0;
+      const activeShare = count > 0 ? (active / count) * 100 : 0;
+      html += `
+        <div class="month-row">
+          <div class="month-top">
+            <div class="name">${escapeHtml(formatMonthLabel(key))}</div>
+            <div class="bar-track tall"><div class="bar-fill-wrap" style="width:${totalPct}%">
+              <div class="bar-seg closed" style="width:${closedShare}%">${closed > 0 ? closed : ""}</div>
+              <div class="bar-seg active" style="width:${activeShare}%">${active > 0 ? active : ""}</div>
+            </div></div>
+            <div class="count">${count}</div>
+          </div>
+        </div>`;
+    });
+    html += '</div>'; // .funnel-col
+
+    html += `
+      <div class="funnel-explain">
+        <h2>Что это значит</h2>
+        <p>Для каждого месяца показано, сколько откликов было отправлено, а из них — сколько уже получили
+        окончательный результат («закрыто»: отказ, архивация вакансии или предложение о работе), а сколько
+        ещё ждут ответа («в работе»: отклик отправлен, идёт скрининг или собеседование).</p>
+        <p>Высота/яркость плашки месяца показывает общую активность отклика в этот период, а деление на два
+        цвета — насколько по этому месяцу уже есть ясность, а насколько процесс ещё не завершён.</p>
+        <div class="legend">
+          <div class="legend-row"><span class="legend-swatch" style="background:#5c5650"></span>Закрытые отклики</div>
+          <div class="legend-row"><span class="legend-swatch" style="background:var(--good)"></span>Отклики в работе</div>
+        </div>
+      </div>`;
+    html += '</div>'; // .funnel-block
+  }
+
+  // profiles by month
+  if (sortedMonths.length && profileCol) {
+    const grandTotal = Object.values(profileTotals).reduce((a, b) => a + b, 0);
+    html += '<div class="funnel-block">';
+    html += '<div class="funnel-col"><h2>Профили по месяцам</h2>';
+
+    // выделенная строка — итог по профилям за всё время
+    let totalSegmentsHtml = "";
+    profileOrder.forEach(name => {
+      const c = profileTotals[name] || 0;
+      if (c === 0) return;
+      const share = grandTotal > 0 ? (c / grandTotal) * 100 : 0;
+      totalSegmentsHtml += `<div class="profile-seg" style="width:${share}%;background:${profileColor[name]};color:${PROFILE_TEXT_COLOR_MAP[name] || "#fff"}" title="${escapeHtml(name)}">${c}</div>`;
+    });
+    html += `
+      <div class="month-row total-row">
+        <div class="month-top">
+          <div class="name">Всего</div>
+          <div class="bar-track tall"><div class="bar-fill-wrap" style="width:100%">${totalSegmentsHtml}</div></div>
+          <div class="count">${grandTotal}</div>
+        </div>
+      </div>`;
+
+    sortedMonths.forEach(([key, count]) => {
+      const perProfile = monthProfileCounts[key] || {};
+      let segmentsHtml = "";
+      profileOrder.forEach(name => {
+        const c = perProfile[name] || 0;
+        if (c === 0) return;
+        const share = count > 0 ? (c / count) * 100 : 0;
+        segmentsHtml += `<div class="profile-seg" style="width:${share}%;background:${profileColor[name]};color:${PROFILE_TEXT_COLOR_MAP[name] || "#fff"}" title="${escapeHtml(name)}">${c}</div>`;
+      });
+      html += `
+        <div class="month-row">
+          <div class="month-top">
+            <div class="name">${escapeHtml(formatMonthLabel(key))}</div>
+            <div class="bar-track tall"><div class="bar-fill-wrap" style="width:100%">${segmentsHtml}</div></div>
+            <div class="count">${count}</div>
+          </div>
+        </div>`;
+    });
+    html += '</div>'; // .funnel-col
+
+    html += `
+      <div class="funnel-explain">
+        <h2>Что это значит</h2>
+        <p>Здесь показано, с каким позиционированием (профилем) я откликалась на вакансии в каждый месяц —
+        например, как Agile Coach, Scrum Master или Project Manager.</p>
+        <p>В отличие от предыдущей диаграммы, где длина плашки показывала общее число откликов за месяц,
+        здесь длина плашки у всех месяцев одинаковая — потому что важно не количество откликов, а то,
+        <b>из каких долей (%) оно складывалось</b>: какую часть месяца заняли отклики с одним профилем,
+        а какую — с другим. Цифры на цветных участках — это фактическое число откликов, а не проценты;
+        общее число откликов за месяц по-прежнему показано числом справа.</p>
+        <div class="legend legend-wrap">
+          ${profileOrder.map(name => `<div class="legend-row"><span class="legend-swatch" style="background:${profileColor[name]}"></span>${escapeHtml(name)}</div>`).join("")}
+        </div>
+      </div>`;
+    html += '</div>'; // .funnel-block
+  }
+
+  content.innerHTML = html;
+}
+
+let jsonpCallbackCounter = 0;
+
+function loadData() {
+  document.getElementById("content").innerHTML = '<div class="state-msg">Загружаю данные из таблицы…</div>';
+  document.getElementById("subtitle").textContent = "Загрузка данных…";
+
+  const callbackName = "gvizCallback_" + (jsonpCallbackCounter++);
+  const timeoutId = setTimeout(() => {
+    if (window[callbackName]) {
+      showError("Превышено время ожидания ответа от Google Sheets.");
+      delete window[callbackName];
+    }
+  }, 12000);
+
+  window[callbackName] = function (json) {
+    clearTimeout(timeoutId);
+    delete window[callbackName];
+    script.remove();
+    try {
+      const cols = json.table.cols.map((c, i) => (c.label && c.label.trim()) || c.id || ("col" + i));
+      const rows = json.table.rows
+        .map(r => {
+          const obj = {};
+          const raw = {};
+          r.c.forEach((cell, i) => {
+            const formatted = cell ? (cell.f !== undefined && cell.f !== null ? cell.f : (cell.v !== undefined && cell.v !== null ? cell.v : "")) : "";
+            obj[cols[i]] = formatted;
+            raw[cols[i]] = cell ? cell.v : null;
+          });
+          obj.__raw = raw;
+          return obj;
+        })
+        .filter(r => Object.keys(r).some(k => k !== "__raw" && String(r[k]).trim() !== ""));
+      render(rows, cols);
+    } catch (e) {
+      showError("Не удалось разобрать ответ таблицы: " + e.message);
+    }
+  };
+
+  const script = document.createElement("script");
+  script.src = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json;responseHandler:${callbackName}&gid=${GID}`;
+  script.onerror = () => {
+    clearTimeout(timeoutId);
+    showError("Не удалось загрузить скрипт с данными. Проверьте, что доступ к листу открыт по ссылке.");
+  };
+  document.body.appendChild(script);
+}
+
+function showError(message) {
+  document.getElementById("subtitle").textContent = "Не удалось загрузить данные";
+  document.getElementById("content").innerHTML = `
+    <div class="state-msg">
+      ${escapeHtml(message)}<br>
+      Убедитесь, что доступ к листу открыт по ссылке ("Кто угодно с ссылкой — Читатель"),
+      и попробуйте обновить.
+    </div>`;
+}
+
+document.getElementById("refreshBtn").addEventListener("click", loadData);
+loadData();
+</script>
+
+</body>
+</html>
