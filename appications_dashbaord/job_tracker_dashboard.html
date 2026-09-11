@@ -247,10 +247,23 @@
   }
   .bar-seg.closed { background: #5c5650; }
   .bar-seg.active { background: var(--good); }
+  .ai-theme {
+    background: #fdf6e0 !important;
+    border: 1px solid #c98a2c !important;
+  }
+  .ai-theme h2 { color: #8a5a12; }
+  .month-row .count.ai-count {
+    width: auto;
+    min-width: 96px;
+    font-size: 12px;
+    white-space: nowrap;
+  }
   .month-row.total-row {
-    margin-bottom: 18px;
-    padding-bottom: 16px;
-    border-bottom: 1px solid var(--border);
+    background: #f0eee9;
+    border-radius: 8px;
+    padding: 10px 10px 16px 10px;
+    margin: 0 0 18px 0;
+    border-bottom: 3px solid #2b2825;
   }
   .month-row.total-row .name {
     font-weight: 700;
@@ -320,8 +333,31 @@ const COLUMNS = {
   date: "Appy date",
   status: "Status",
   profile: "Profile",
-  resume: "Resume"
+  resume: "Resume",
+  ai: "AI",
+  aiLevel: "Уровень AI"
 };
+
+// Уровни AI-вакансий: фиксированный порядок и цвета (жёлто-оранжевая гамма — тема AI-блока)
+const AI_LEVEL_ORDER = ["Легкий", "Средний", "Продвинутый", "Не указан"];
+const AI_LEVEL_COLOR_MAP = {
+  "Легкий": "#f0d264",
+  "Средний": "#e2a640",
+  "Продвинутый": "#8a3f1f",
+  "Не указан": "#4a4540"
+};
+const AI_LEVEL_TEXT_COLOR_MAP = {
+  "Легкий": "#4a3a10",
+  "Средний": "#3a2a0a"
+};
+
+// В данных "Легкий" встречается и как "Легкий", и как "Лёгкий" — сравниваем без учёта ё/е
+function normalizeAiLevel(raw) {
+  const s = String(raw || "").trim().replace(/ё/g, "е").replace(/Ё/g, "Е");
+  if (!s) return "Не указан";
+  const match = AI_LEVEL_ORDER.find(l => l.replace(/ё/g, "е") === s);
+  return match || "Не указан";
+}
 
 // Статусы, из которых складывается воронка (сравнение без учёта регистра/пробелов)
 const FUNNEL_STATUSES = {
@@ -421,6 +457,8 @@ function render(rows, headers) {
   const statusCol = findColumn(headers, COLUMNS.status);
   const profileCol = findColumn(headers, COLUMNS.profile);
   const resumeCol = findColumn(headers, COLUMNS.resume);
+  const aiCol = findColumn(headers, COLUMNS.ai);
+  const aiLevelCol = findColumn(headers, COLUMNS.aiLevel);
 
   subtitle.textContent = `Всего откликов: ${rows.length} · обновлено ${new Date().toLocaleString("ru-RU")}`;
 
@@ -472,6 +510,31 @@ function render(rows, headers) {
   profileOrder.forEach((name, i) => {
     profileColor[name] = PROFILE_COLOR_MAP[name] || PROFILE_PALETTE[i % PROFILE_PALETTE.length];
   });
+
+  // ---- AI-отклики по месяцам ----
+  const monthAiCount = {};       // { monthKey: количество откликов с AI = "да" }
+  const monthAiLevelCounts = {}; // { monthKey: { level: count } }
+  let totalAiAllTime = 0;
+  const totalAiLevelAllTime = {};
+  if (aiCol && dateCol) {
+    rows.forEach(r => {
+      const raw = r.__raw ? r.__raw[dateCol] : null;
+      const d = parseDateCell(raw, r[dateCol]);
+      if (!d || isNaN(d.getTime())) return;
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+      const isAi = String(r[aiCol] || "").trim().toLowerCase() === "да";
+      if (!isAi) return;
+      monthAiCount[key] = (monthAiCount[key] || 0) + 1;
+      totalAiAllTime++;
+      const level = aiLevelCol ? String(r[aiLevelCol] || "").trim() : "";
+      const bucket = normalizeAiLevel(level);
+      if (!monthAiLevelCounts[key]) monthAiLevelCounts[key] = {};
+      monthAiLevelCounts[key][bucket] = (monthAiLevelCounts[key][bucket] || 0) + 1;
+      totalAiLevelAllTime[bucket] = (totalAiLevelAllTime[bucket] || 0) + 1;
+    });
+  }
+  const maxAiCount = Math.max(1, ...Object.values(monthAiCount));
+  const totalResponsesWithDate = Object.values(monthCounts).reduce((a, b) => a + b, 0);
 
   // ---- воронка ----
   let level1 = rows.length;
@@ -636,6 +699,72 @@ function render(rows, headers) {
         общее число откликов за месяц по-прежнему показано числом справа.</p>
         <div class="legend legend-wrap">
           ${profileOrder.map(name => `<div class="legend-row"><span class="legend-swatch" style="background:${profileColor[name]}"></span>${escapeHtml(name)}</div>`).join("")}
+        </div>
+      </div>`;
+    html += '</div>'; // .funnel-block
+  }
+
+  // AI-отклики по месяцам
+  if (sortedMonths.length && aiCol) {
+    const totalPct = (n) => (totalResponsesWithDate > 0 ? Math.round((n / totalResponsesWithDate) * 100) : 0);
+
+    html += '<div class="funnel-block">';
+    html += '<div class="funnel-col ai-theme"><h2>AI-фокус: отклики по месяцам</h2>';
+
+    // строка "Всего" — по аналогии с блоком профилей
+    let totalLevelSegments = "";
+    AI_LEVEL_ORDER.forEach(level => {
+      const c = totalAiLevelAllTime[level] || 0;
+      if (c === 0) return;
+      const share = totalAiAllTime > 0 ? (c / totalAiAllTime) * 100 : 0;
+      totalLevelSegments += `<div class="profile-seg" style="width:${share}%;background:${AI_LEVEL_COLOR_MAP[level]};color:${AI_LEVEL_TEXT_COLOR_MAP[level] || "#fff"}" title="${escapeHtml(level)}">${c}</div>`;
+    });
+    html += `
+      <div class="month-row total-row">
+        <div class="month-top">
+          <div class="name">Всего</div>
+          <div class="bar-track tall"><div class="bar-fill-wrap" style="width:100%">${totalLevelSegments}</div></div>
+          <div class="count ai-count">${totalAiAllTime} из ${totalResponsesWithDate} (${totalPct(totalAiAllTime)}%)</div>
+        </div>
+      </div>`;
+
+    sortedMonths.forEach(([key]) => {
+      const monthTotal = monthCounts[key] || 0;
+      const aiCount = monthAiCount[key] || 0;
+      const widthPct = Math.round((aiCount / maxAiCount) * 100);
+      const levelCounts = monthAiLevelCounts[key] || {};
+      let segmentsHtml = "";
+      AI_LEVEL_ORDER.forEach(level => {
+        const c = levelCounts[level] || 0;
+        if (c === 0) return;
+        const share = aiCount > 0 ? (c / aiCount) * 100 : 0;
+        segmentsHtml += `<div class="profile-seg" style="width:${share}%;background:${AI_LEVEL_COLOR_MAP[level]};color:${AI_LEVEL_TEXT_COLOR_MAP[level] || "#fff"}" title="${escapeHtml(level)}">${c}</div>`;
+      });
+      const pct = monthTotal > 0 ? Math.round((aiCount / monthTotal) * 100) : 0;
+      html += `
+        <div class="month-row">
+          <div class="month-top">
+            <div class="name">${escapeHtml(formatMonthLabel(key))}</div>
+            <div class="bar-track tall"><div class="bar-fill-wrap" style="width:${widthPct}%">${segmentsHtml}</div></div>
+            <div class="count ai-count">${aiCount} из ${monthTotal} (${pct}%)</div>
+          </div>
+        </div>`;
+    });
+    html += '</div>'; // .funnel-col
+
+    html += `
+      <div class="funnel-explain ai-theme">
+        <h2>Что это значит</h2>
+        <p>11 сентября я поставила себе цель: получить приглашение на работу, связанное с AI-направлением,
+        чтобы дальше развиваться именно в этой области. Чтобы двигаться к этой цели осознанно, мне важно
+        видеть, как меняется доля AI-вакансий среди моих откликов месяц за месяцем — это первый шаг
+        до собеседований, и его тоже стоит отслеживать отдельно.</p>
+        <p>Для каждого месяца показано: сколько откликов было связано с AI (текст вида «2 из 52 (3%)» —
+        то есть 2 AI-отклика из 52 всего, это 3%), и на каком уровне сложности AI были эти вакансии —
+        Лёгкий, Средний или Продвинутый. Длина закрашенной части сравнивает месяцы между собой
+        по количеству AI-откликов, а строка «Всего» вверху — это итог по всем месяцам сразу.</p>
+        <div class="legend legend-wrap">
+          ${AI_LEVEL_ORDER.map(level => `<div class="legend-row"><span class="legend-swatch" style="background:${AI_LEVEL_COLOR_MAP[level]}"></span>${escapeHtml(level)}</div>`).join("")}
         </div>
       </div>`;
     html += '</div>'; // .funnel-block
