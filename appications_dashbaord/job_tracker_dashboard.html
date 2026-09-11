@@ -536,6 +536,36 @@ function render(rows, headers) {
   const maxAiCount = Math.max(1, ...Object.values(monthAiCount));
   const totalResponsesWithDate = Object.values(monthCounts).reduce((a, b) => a + b, 0);
 
+  // ---- AI-собеседования по месяцам ----
+  const monthRealInterview = {};      // { monthKey: количество "реальных" собеседований (screening/interview/refused after interview/offer) }
+  const monthAiInterview = {};        // { monthKey: из них с AI = "да" }
+  const monthAiInterviewLevelCounts = {}; // { monthKey: { level: count } }
+  let totalRealInterviewAllTime = 0;
+  let totalAiInterviewAllTime = 0;
+  const totalAiInterviewLevelAllTime = {};
+  if (statusCol && dateCol) {
+    rows.forEach(r => {
+      const raw = r.__raw ? r.__raw[dateCol] : null;
+      const d = parseDateCell(raw, r[dateCol]);
+      if (!d || isNaN(d.getTime())) return;
+      const s = normStatus(r[statusCol]);
+      if (!FUNNEL_STATUSES.interviewReal.includes(s)) return;
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+      monthRealInterview[key] = (monthRealInterview[key] || 0) + 1;
+      totalRealInterviewAllTime++;
+      const isAi = aiCol ? String(r[aiCol] || "").trim().toLowerCase() === "да" : false;
+      if (!isAi) return;
+      monthAiInterview[key] = (monthAiInterview[key] || 0) + 1;
+      totalAiInterviewAllTime++;
+      const level = aiLevelCol ? String(r[aiLevelCol] || "").trim() : "";
+      const bucket = normalizeAiLevel(level);
+      if (!monthAiInterviewLevelCounts[key]) monthAiInterviewLevelCounts[key] = {};
+      monthAiInterviewLevelCounts[key][bucket] = (monthAiInterviewLevelCounts[key][bucket] || 0) + 1;
+      totalAiInterviewLevelAllTime[bucket] = (totalAiInterviewLevelAllTime[bucket] || 0) + 1;
+    });
+  }
+  const maxRealInterview = Math.max(1, ...Object.values(monthRealInterview));
+
   // ---- воронка ----
   let level1 = rows.length;
   let level2 = 0, level3 = 0, level4 = 0, activeCount = 0;
@@ -765,6 +795,89 @@ function render(rows, headers) {
         по количеству AI-откликов, а строка «Всего» вверху — это итог по всем месяцам сразу.</p>
         <div class="legend legend-wrap">
           ${AI_LEVEL_ORDER.map(level => `<div class="legend-row"><span class="legend-swatch" style="background:${AI_LEVEL_COLOR_MAP[level]}"></span>${escapeHtml(level)}</div>`).join("")}
+        </div>
+      </div>`;
+    html += '</div>'; // .funnel-block
+  }
+
+  // AI-собеседования по месяцам
+  if (sortedMonths.length && statusCol && aiCol) {
+    const REGULAR_LABEL = "Обычные (не AI)";
+    const REGULAR_COLOR = "#5c5650";
+
+    html += '<div class="funnel-block">';
+    html += '<div class="funnel-col ai-theme"><h2>AI-собеседования по месяцам</h2>';
+
+    let totalInterviewLevelSegments = "";
+    AI_LEVEL_ORDER.forEach(level => {
+      const c = totalAiInterviewLevelAllTime[level] || 0;
+      if (c === 0) return;
+      const share = totalRealInterviewAllTime > 0 ? (c / totalRealInterviewAllTime) * 100 : 0;
+      totalInterviewLevelSegments += `<div class="profile-seg" style="width:${share}%;background:${AI_LEVEL_COLOR_MAP[level]};color:${AI_LEVEL_TEXT_COLOR_MAP[level] || "#fff"}" title="${escapeHtml(level)}">${c}</div>`;
+    });
+    const totalRegular = totalRealInterviewAllTime - totalAiInterviewAllTime;
+    if (totalRegular > 0) {
+      const share = totalRealInterviewAllTime > 0 ? (totalRegular / totalRealInterviewAllTime) * 100 : 0;
+      totalInterviewLevelSegments += `<div class="profile-seg" style="width:${share}%;background:${REGULAR_COLOR};color:#fff" title="${REGULAR_LABEL}">${totalRegular}</div>`;
+    }
+    html += `
+      <div class="month-row total-row">
+        <div class="month-top">
+          <div class="name">Всего</div>
+          <div class="bar-track tall"><div class="bar-fill-wrap" style="width:100%">${totalInterviewLevelSegments}</div></div>
+          <div class="count ai-count">${totalAiInterviewAllTime} из ${totalRealInterviewAllTime}</div>
+        </div>
+      </div>`;
+
+    sortedMonths.forEach(([key]) => {
+      const monthReal = monthRealInterview[key] || 0;
+      const monthAi = monthAiInterview[key] || 0;
+      const monthRegular = monthReal - monthAi;
+      const widthPct = Math.round((monthReal / maxRealInterview) * 100);
+      const levelCounts = monthAiInterviewLevelCounts[key] || {};
+      let segmentsHtml = "";
+      AI_LEVEL_ORDER.forEach(level => {
+        const c = levelCounts[level] || 0;
+        if (c === 0) return;
+        const share = monthReal > 0 ? (c / monthReal) * 100 : 0;
+        segmentsHtml += `<div class="profile-seg" style="width:${share}%;background:${AI_LEVEL_COLOR_MAP[level]};color:${AI_LEVEL_TEXT_COLOR_MAP[level] || "#fff"}" title="${escapeHtml(level)}">${c}</div>`;
+      });
+      if (monthRegular > 0) {
+        const share = monthReal > 0 ? (monthRegular / monthReal) * 100 : 0;
+        segmentsHtml += `<div class="profile-seg" style="width:${share}%;background:${REGULAR_COLOR};color:#fff" title="${REGULAR_LABEL}">${monthRegular}</div>`;
+      }
+      html += `
+        <div class="month-row">
+          <div class="month-top">
+            <div class="name">${escapeHtml(formatMonthLabel(key))}</div>
+            <div class="bar-track tall"><div class="bar-fill-wrap" style="width:${widthPct}%">${segmentsHtml}</div></div>
+            <div class="count ai-count">${monthAi} из ${monthReal}</div>
+          </div>
+        </div>`;
+    });
+    html += '</div>'; // .funnel-col
+
+    html += `
+      <div class="funnel-explain ai-theme">
+        <h2>Что это значит</h2>
+        <p>Это следующий шаг после доли AI-откликов: сколько моих <b>реальных собеседований</b>
+        (скрининг, интервью, отказ после интервью или оффер) были именно по AI-вакансиям. Это тоже
+        часть движения к моей цели — важно не только откликаться на AI-вакансии, но и доходить
+        по ним до разговора с работодателем.</p>
+        <p>Так как AI-собеседований пока единицы, сравнивать месяцы только между собой по их числу
+        было не очень наглядно. Поэтому теперь длина закрашенной части — это все собеседования месяца
+        (и AI, и обычные), а внутри она делится по цвету: оттенки оранжевого — AI-собеседования
+        (по уровню сложности), тёмно-серый — обычные, не связанные с AI. Так сразу видно и общий объём
+        собеседований, и какую его часть занимает AI. Текст «3 из 5» по-прежнему означает: 3 из 5
+        собеседований месяца — по AI.</p>
+        <p><b>Важный нюанс:</b> месяц здесь — это месяц, когда был отправлен отклик, а не месяц,
+        когда фактически прошло собеседование. Собеседование может состояться сильно позже отклика,
+        поэтому у месяца с самым большим числом откликов (например, август) собеседований на диаграмме
+        может быть мало или совсем не быть — это не ошибка, а просто разный горизонт: отклики видно
+        сразу, а собеседования по ним ещё могут быть впереди.</p>
+        <div class="legend legend-wrap">
+          ${AI_LEVEL_ORDER.map(level => `<div class="legend-row"><span class="legend-swatch" style="background:${AI_LEVEL_COLOR_MAP[level]}"></span>${escapeHtml(level)}</div>`).join("")}
+          <div class="legend-row"><span class="legend-swatch" style="background:${REGULAR_COLOR}"></span>${REGULAR_LABEL}</div>
         </div>
       </div>`;
     html += '</div>'; // .funnel-block
