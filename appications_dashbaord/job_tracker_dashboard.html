@@ -228,6 +228,19 @@
     color: var(--muted);
     flex-shrink: 0;
   }
+  .count-col {
+    width: 58px;
+    flex-shrink: 0;
+    text-align: right;
+  }
+  .count-col .count {
+    width: auto;
+  }
+  .count-col .pace {
+    font-size: 10px;
+    color: var(--muted);
+    white-space: nowrap;
+  }
   .bar-fill-wrap {
     display: flex;
     height: 100%;
@@ -398,6 +411,56 @@ function parseDateCell(raw, formatted) {
 }
 
 const MONTH_NAMES_RU = ["янв", "фев", "мар", "апр", "май", "июн", "июл", "авг", "сен", "окт", "ноя", "дек"];
+
+// Нерабочие праздничные/перенесённые дни РФ на 2026 год (будни, выпадающие на праздники —
+// обычные выходные сб/вс считаются рабочим календарём отдельно и сюда не входят)
+const RU_HOLIDAYS_2026 = new Set([
+  "2026-01-01", "2026-01-02", "2026-01-05", "2026-01-06", "2026-01-07", "2026-01-08", "2026-01-09",
+  "2026-02-23",
+  "2026-03-09",
+  "2026-05-01", "2026-05-11",
+  "2026-06-12",
+  "2026-11-04",
+  "2026-12-31"
+]);
+
+function isWorkingDay(date) {
+  const dow = date.getDay(); // 0=вс, 6=сб
+  if (dow === 0 || dow === 6) return false;
+  const iso = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+  if (date.getFullYear() === 2026 && RU_HOLIDAYS_2026.has(iso)) return false;
+  return true;
+}
+
+// Рабочих дней в месяце целиком
+function workingDaysInMonth(year, month0) {
+  const daysInMonth = new Date(year, month0 + 1, 0).getDate();
+  let n = 0;
+  for (let d = 1; d <= daysInMonth; d++) {
+    if (isWorkingDay(new Date(year, month0, d))) n++;
+  }
+  return n;
+}
+
+// Рабочих дней в месяце с 1 числа по upToDay включительно
+function workingDaysElapsed(year, month0, upToDay) {
+  let n = 0;
+  for (let d = 1; d <= upToDay; d++) {
+    if (isWorkingDay(new Date(year, month0, d))) n++;
+  }
+  return n;
+}
+
+// Скорость подачи откликов (откликов в неделю) для месяца monthKey ("YYYY-MM")
+function weeklyPace(monthKey, count) {
+  const [y, m] = monthKey.split("-").map(Number);
+  const year = y, month0 = m - 1;
+  const today = new Date();
+  const isCurrentMonth = today.getFullYear() === year && today.getMonth() === month0;
+  const workDays = isCurrentMonth ? workingDaysElapsed(year, month0, today.getDate()) : workingDaysInMonth(year, month0);
+  if (workDays <= 0) return null;
+  return (count / workDays) * 5;
+}
 
 function findColumn(headers, exactName) {
   return headers.find(h => h.trim() === exactName) || null;
@@ -644,6 +707,8 @@ function render(rows, headers) {
       const active = monthActive[key] || 0;
       const closedShare = count > 0 ? (closed / count) * 100 : 0;
       const activeShare = count > 0 ? (active / count) * 100 : 0;
+      const pace = weeklyPace(key, count);
+      const paceText = pace !== null ? `${Math.round(pace)} в нед` : "";
       html += `
         <div class="month-row">
           <div class="month-top">
@@ -652,7 +717,10 @@ function render(rows, headers) {
               <div class="bar-seg closed" style="width:${closedShare}%">${closed > 0 ? closed : ""}</div>
               <div class="bar-seg active" style="width:${activeShare}%">${active > 0 ? active : ""}</div>
             </div></div>
-            <div class="count">${count}</div>
+            <div class="count-col">
+              <div class="count">${count}</div>
+              <div class="pace">${paceText}</div>
+            </div>
           </div>
         </div>`;
     });
@@ -666,6 +734,11 @@ function render(rows, headers) {
         ещё ждут ответа («в работе»: отклик отправлен, идёт скрининг или собеседование).</p>
         <p>Высота/яркость плашки месяца показывает общую активность отклика в этот период, а деление на два
         цвета — насколько по этому месяцу уже есть ясность, а насколько процесс ещё не завершён.</p>
+        <p>Число вида «5 в нед» под общим количеством откликов — это <b>средняя скорость подачи откликов
+        в неделю</b> за этот месяц: сколько откликов в среднем уходило за одну рабочую неделю. Считается
+        по рабочим дням месяца (для текущего, ещё не закончившегося месяца — по уже прошедшим рабочим дням),
+        с учётом официальных праздников и переносов выходных 2026 года — чтобы короткий месяц с праздниками
+        не выглядел так, будто отклики подавались медленнее, чем на самом деле.</p>
         <div class="legend">
           <div class="legend-row"><span class="legend-swatch" style="background:#5c5650"></span>Закрытые отклики</div>
           <div class="legend-row"><span class="legend-swatch" style="background:var(--good)"></span>Отклики в работе</div>
