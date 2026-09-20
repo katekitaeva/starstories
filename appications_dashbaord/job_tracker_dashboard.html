@@ -140,38 +140,87 @@
   }
   .active-badge b { font-size: 14px; }
 
-  .funnel {
+  /* ---------- воронка (блок 1) ---------- */
+  .fn-card { padding: 18px 22px 24px; }
+  .fn-stage { container-type: inline-size; }
+  /* Ширина воронки подстраивается под ширину карточки; справа остаётся место под цифры */
+  .fn-inner {
+    --fn-gap: 12px;
+    --fn-right-min: 110px;
+    --fn-rh: 84px;
+    --fn-w: clamp(150px, calc(100cqw - var(--fn-right-min) - var(--fn-gap)), 340px);
+    max-width: 700px;
+    margin: 0 auto;
+  }
+  .fn-rows { display: grid; }
+  .fn-row {
+    display: grid;
+    grid-template-columns: var(--fn-w) 1fr;
+    column-gap: var(--fn-gap);
+    height: var(--fn-rh);
+  }
+  .fn-shape { grid-area: 1 / 1; }
+  .fn-label {
+    grid-area: 1 / 1;
+    place-self: center;
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    white-space: nowrap;
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(10, 30, 70, 0.25);
+  }
+  .fn-label.dark-text { color: #0f2a5c; text-shadow: none; }
+  .fn-name {
+    font-size: clamp(13px, calc(var(--fn-w) * 0.066), 22px);
+    font-weight: 700;
+    line-height: 1;
+  }
+  .fn-conv {
+    font-size: clamp(10px, calc(var(--fn-w) * 0.038), 13px);
+    font-weight: 600;
+    line-height: 1;
+    opacity: 0.9;
+  }
+  .fn-right {
+    grid-area: 1 / 2;
+    box-sizing: border-box;
+    min-width: 0;
+    margin: 5px 0;
+    padding: 6px 10px;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    background: linear-gradient(90deg, var(--fn-soft), #fff);
+    border: 1px solid var(--fn-line);
+    border-radius: 12px;
   }
-  .funnel-stage {
-    width: 100%;
-    max-width: 420px;
-    background: var(--accent);
-    color: #fff;
-    padding: 14px 14px 20px 14px;
-    text-align: center;
+  .fn-main { display: flex; align-items: baseline; flex-wrap: wrap; gap: 3px 5px; }
+  .fn-icon { font-size: 18px; line-height: 1; }
+  .fn-num { font-size: 22px; font-weight: 700; line-height: 1.1; }
+  .fn-unit { font-size: 11px; color: var(--muted); }
+  .fn-pct b { display: block; font-size: 14px; line-height: 1.2; }
+  .fn-pct span { display: block; font-size: 10px; color: var(--muted); line-height: 1.2; }
+  @container (min-width: 520px) {
+    .fn-inner { --fn-right-min: 250px; --fn-rh: 72px; }
+    .fn-right {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 6px 18px 6px 16px;
+    }
+    .fn-main { flex-wrap: nowrap; gap: 8px; align-items: baseline; }
+    .fn-icon { font-size: 22px; }
+    .fn-num { font-size: 26px; }
+    .fn-unit { font-size: 12px; margin-left: -3px; }
+    .fn-pct { padding-left: 14px; border-left: 1px solid var(--fn-line); }
+    .fn-pct b { font-size: 18px; }
   }
-  .funnel-stage .stage-name {
-    font-size: 12px;
-    opacity: 0.9;
-    margin-bottom: 2px;
-  }
-  .funnel-stage .stage-num {
-    font-size: 20px;
-    font-weight: 700;
-  }
-  .funnel-stage .stage-pct {
-    font-size: 11px;
-    opacity: 0.85;
-    margin-top: 2px;
-  }
-  .funnel-stage:first-child { border-radius: 8px 8px 0 0; }
-  .funnel-stage:last-child { border-radius: 0 0 8px 8px; padding-bottom: 14px; }
-  .funnel-stage:nth-child(2) { background: #bf6a3f; }
-  .funnel-stage:nth-child(3) { background: #cc8354; }
-  .funnel-stage:nth-child(4) { background: #d99c6c; }
+  .legend-emoji { width: 22px; text-align: center; font-size: 16px; flex-shrink: 0; }
 
   .funnel-explain p {
     font-size: 13px;
@@ -378,12 +427,68 @@ const FUNNEL_STATUSES = {
   interviewReal: ["screening", "interview", "refused (after interview)", "job offer!!!"],
   offer: ["job offer!!!"]
 };
-const ACTIVE_STATUS = "applyed";
+// «Сейчас в работе»: ждут ответа (принимаем оба написания — applyed и applied) и идут интервью
+const ACTIVE_STATUSES = ["applyed", "applied", "interview"];
+
+// ---------- воронка (блок 1): источник данных — колонки-флаги в таблице ----------
+// Ищем колонки по устойчивой части заголовка: эмодзи и пробелы по краям в названиях не важны.
+const FN_COLS = {
+  applied: "воронка - applied",
+  screening: "воронка скрининг",
+  interview1: "воронка интервью 1",
+  interview2: "воронка интервью 2",
+  interview3: "воронка интервью 3",
+  offer: "воронка офер"
+};
+
+function normHeader(h) {
+  return String(h || "").replace(/\s+/g, " ").trim().toLowerCase();
+}
+
+function findColumnByPart(headers, part) {
+  return headers.find(h => normHeader(h).includes(part)) || null;
+}
+
+// Флаг этапа: 1 / true / "1" — этап пройден; пусто и 0 — нет
+function isFlag(v) {
+  if (v === true) return true;
+  if (typeof v === "number") return v === 1;
+  const s = String(v == null ? "" : v).trim().toLowerCase();
+  return s === "1" || s === "true";
+}
+
+const FN_STAGE_META = [
+  { label: "Отклики", icon: "📝", desc: "Отправила резюме" },
+  { label: "Скрининг", icon: "☎️", desc: "Дошла до скрининга" },
+  { label: "Интервью", icon: "🧑‍💼", desc: "Дошла до первого интервью" },
+  { label: "Оффер", icon: "🎉", desc: "Получила предложение о работе" }
+];
+
+// Первые три этапа — оттенки синего (тёмный → светлый), последний — зелёный
+const FN_PALETTE = [
+  { fill: "#2c68cf", soft: "#eaf0fb", line: "#cbd8f1" },
+  { fill: "#4a95ee", soft: "#eaf3fd", line: "#c8dcf6" },
+  { fill: "#8cc6f8", soft: "#edf6fe", line: "#cfe4f8", darkText: true },
+  { fill: "#2fb463", soft: "#e7f5ec", line: "#c5e6d1" }
+];
+
+// Ширина ступеней (в % от ширины воронки) задаётся по рангу этапа, а не строго пропорционально цифрам —
+// иначе при большом разбросе значений (168 → 2) форма ломается. Точные числа показаны текстом.
+const FN_WIDTHS = [100, 84, 68, 54];
+const FN_TAIL = 42; // ширина «носика» воронки под последним этапом
+
+function fnClip(i) {
+  const top = FN_WIDTHS[i];
+  const bottom = i < FN_WIDTHS.length - 1 ? FN_WIDTHS[i + 1] : FN_TAIL;
+  const ti = (100 - top) / 2;
+  const bi = (100 - bottom) / 2;
+  return `polygon(${ti}% 0, ${100 - ti}% 0, ${100 - bi}% 100%, ${bi}% 100%)`;
+}
 
 // Отклики "закрытые" (по ним уже есть финальное решение) vs "в работе" (ещё в процессе)
 const RESOLUTION_STATUSES = {
   closed: ["refused (no interview)", "refused (after interview)", "vacancy is archived", "job offer!!!"],
-  active: ["to apply", "applyed", "resume is checked", "screening", "interview"]
+  active: ["to apply", "applyed", "applied", "resume is checked", "screening", "interview"]
 };
 
 function normStatus(s) {
@@ -630,69 +735,71 @@ function render(rows, headers) {
   const maxRealInterview = Math.max(1, ...Object.values(monthRealInterview));
 
   // ---- воронка ----
-  let level1 = rows.length;
-  let level2 = 0, level3 = 0, level4 = 0, activeCount = 0;
+  // Источник — колонки-флаги в таблице: 1 = отклик дошёл до этапа, пусто или 0 = нет.
+  const fnCols = {};
+  Object.keys(FN_COLS).forEach(k => { fnCols[k] = findColumnByPart(headers, FN_COLS[k]); });
+  const fnMissing = ["applied", "screening", "interview1", "offer"].filter(k => !fnCols[k]);
+  const fnSum = col => (col ? rows.reduce((acc, r) => acc + (isFlag(r.__raw ? r.__raw[col] : r[col]) ? 1 : 0), 0) : 0);
+  const level1 = fnSum(fnCols.applied);
+  const level2 = fnSum(fnCols.screening);
+  const level3 = fnSum(fnCols.interview1);
+  const level4 = fnSum(fnCols.offer);
+  const round2 = fnSum(fnCols.interview2);
+  const round3 = fnSum(fnCols.interview3);
+
+  let activeCount = 0;
   if (statusCol) {
-    rows.forEach(r => {
-      const s = normStatus(r[statusCol]);
-      if (FUNNEL_STATUSES.interviewPotential.includes(s)) level2++;
-      if (FUNNEL_STATUSES.interviewReal.includes(s)) level3++;
-      if (FUNNEL_STATUSES.offer.includes(s)) level4++;
-      if (s === ACTIVE_STATUS) activeCount++;
-    });
+    rows.forEach(r => { if (ACTIVE_STATUSES.includes(normStatus(r[statusCol]))) activeCount++; });
   }
-  const pct = (a, b) => (b > 0 ? Math.round((a / b) * 100) : 0);
-  // Ширина ступеней задаётся по рангу этапа (фиксированное сужение), а не строго
-  // пропорционально цифрам — иначе при большом разбросе значений (159 → 1) форма
-  // ломается визуально. Точные числа и проценты всё равно показаны текстом.
-  const RANK_WIDTHS = [100, 76, 52, 28];
-  const stages = [
-    { name: "Всего откликов", num: level1, pctOfPrev: null },
-    { name: "Интервью (потенциальные + реальные)", num: level2, pctOfPrev: pct(level2, level1) },
-    { name: "Интервью реальные", num: level3, pctOfPrev: pct(level3, level2) },
-    { name: "Предложение о работе", num: level4, pctOfPrev: pct(level4, level3) }
-  ];
-  const TAIL_WIDTH = 16; // ширина "носика" воронки под последним этапом
-  stages.forEach((st, i) => {
-    const top = RANK_WIDTHS[i];
-    const bottom = i < stages.length - 1 ? RANK_WIDTHS[i + 1] : TAIL_WIDTH;
-    const topInset = (100 - top) / 2;
-    const bottomInset = (100 - bottom) / 2;
-    st.clipPath = `polygon(${topInset}% 0, ${100 - topInset}% 0, ${100 - bottomInset}% 100%, ${bottomInset}% 100%)`;
-  });
+  const fmtPct = (a, b) => (b > 0 ? (a / b * 100).toLocaleString("ru-RU", { maximumFractionDigits: 1 }) + "%" : "—");
+  const fnNums = [level1, level2, level3, level4];
 
   let html = "";
 
   // funnel block
-  html += '<div class="funnel-block">';
-  html += '<div class="funnel-col"><h2>Воронка откликов</h2>';
-  html += `<div class="active-badge"><span class="dot"></span>Сейчас в работе: <b>${activeCount}</b> ${activeCount === 1 ? "отклик ожидает" : "откликов ожидают"} решения</div>`;
-  html += '<div class="funnel">';
-  stages.forEach(st => {
-    html += `
-      <div class="funnel-stage" style="clip-path:${st.clipPath}">
-        <div class="stage-name">${escapeHtml(st.name)}</div>
-        <div class="stage-num">${st.num}</div>
-        ${st.pctOfPrev !== null ? `<div class="stage-pct">${st.pctOfPrev}% от предыдущего этапа</div>` : ""}
-      </div>`;
-  });
-  html += '</div>'; // .funnel
+  html += '<div class="funnel-block fn-block">';
+  html += '<div class="funnel-col fn-card"><h2>Воронка откликов</h2>';
+  html += `<div class="active-badge"><span class="dot"></span><span>Сейчас в работе: <b>${activeCount}</b> ${activeCount === 1 ? "отклик ожидает" : "откликов ожидают"} решения</span></div>`;
+
+  if (fnMissing.length) {
+    html += `<div class="state-msg">Не найдены колонки воронки: ${escapeHtml(fnMissing.map(k => FN_COLS[k]).join(", "))}.<br>Проверьте заголовки колонок в таблице.</div>`;
+  } else {
+    html += '<div class="fn-stage"><div class="fn-inner"><div class="fn-rows">';
+    FN_STAGE_META.forEach((m, i) => {
+      const pal = FN_PALETTE[i];
+      // у Скрининга, Интервью и Оффера рядом с названием — маленький процент от предыдущего этапа
+      const conv = i > 0 ? fmtPct(fnNums[i], fnNums[i - 1]) : "";
+      html += `
+        <div class="fn-row" style="--fn-soft:${pal.soft};--fn-line:${pal.line}">
+          <div class="fn-shape" style="background:${pal.fill};clip-path:${fnClip(i)}"></div>
+          <div class="fn-label${pal.darkText ? " dark-text" : ""}">
+            <span class="fn-name">${escapeHtml(m.label)}</span>${conv ? `<span class="fn-conv">${conv}</span>` : ""}
+          </div>
+          <div class="fn-right">
+            <div class="fn-main">
+              <span class="fn-icon" title="${escapeHtml(m.desc)}">${m.icon}</span>
+              <span class="fn-num">${fnNums[i]}</span><span class="fn-unit">шт.</span>
+            </div>
+            <div class="fn-pct"><b>${i === 0 ? "100%" : fmtPct(fnNums[i], level1)}</b><span>от откликов</span></div>
+          </div>
+        </div>`;
+    });
+    html += '</div></div></div>'; // .fn-rows, .fn-inner, .fn-stage
+  }
   html += '</div>'; // .funnel-col
 
   html += `
     <div class="funnel-explain">
       <h2>Что это значит</h2>
-      <p>Воронка показывает, как отклики постепенно проходят путь от «отправила резюме» до «получила предложение о работе».
-      Каждый следующий уровень — это часть предыдущего: например, «Интервью реальные» — это те отклики
-      из уровня «Интервью (потенциальные + реальные)», где интервью действительно состоялось или ещё может состояться.</p>
-      <p>Чем выше проценты между уровнями, тем эффективнее проходит поиск на этом этапе. Например, если из 100 откликов
-      только 10 доходят до интервью — это узкое место на входе (например, резюме или подбор вакансий). А если из 10 интервью
-      8 заканчиваются предложением — это сильный этап собеседований.</p>
+      <p>Воронка показывает, как мои отклики проходят путь от «отправила резюме» до «получила предложение о работе».
+      Справа — сколько откликов дошло до каждого этапа (в штуках) и какую долю это составляет от всех откликов.</p>
+      <p>Маленькая цифра рядом с названием этапа на воронке — доля от предыдущего этапа. Она показывает, где отсев больше всего:
+      если из 100 откликов только 10 доходят до скрининга — это узкое место на входе (резюме или подбор вакансий),
+      а если из 10 интервью 8 заканчиваются предложением — это сильный этап собеседований.</p>
+      <p>«Интервью» — это отклики, дошедшие хотя бы до первого интервью. Из них второй раунд прошли ${round2}, третий — ${round3}.
+      Вакансии, где меня нашёл рекрутер, в «Отклики» не входят и попадают в воронку начиная со скрининга.</p>
       <div class="legend">
-        <div class="legend-row"><span class="legend-swatch" style="background:var(--accent)"></span>Всего откликов</div>
-        <div class="legend-row"><span class="legend-swatch" style="background:#bf6a3f"></span>Интервью (потенциальные + реальные)</div>
-        <div class="legend-row"><span class="legend-swatch" style="background:#cc8354"></span>Интервью реальные</div>
-        <div class="legend-row"><span class="legend-swatch" style="background:#d99c6c"></span>Предложение о работе</div>
+        ${FN_STAGE_META.map(m => `<div class="legend-row"><span class="legend-emoji">${m.icon}</span>${escapeHtml(m.desc)}</div>`).join("")}
       </div>
     </div>`;
   html += '</div>'; // .funnel-block
