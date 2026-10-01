@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Проводник по претензии</title>
+<style>
+  :root {
+    --bg: #eef2f4;
+    --paper: #ffffff;
+    --ink: #1c2a33;
+    --muted: #5d6f7a;
+    --line: #cfd9de;
+    --accent: #0b6e8a;
+    --accent-ink: #ffffff;
+    --done: #2e7d5b;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #12191e; --paper: #1a242b; --ink: #e6eef2; --muted: #93a5af;
+      --line: #2c3a43; --accent: #4fb3d1; --accent-ink: #0b1a21; --done: #5fc298;
+    }
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 17px/1.55 Georgia, "Times New Roman", serif;
+  }
+  main { max-width: 680px; margin: 0 auto; padding: 32px 18px 80px; }
+  h1 { font-size: 1.5rem; margin: 0 0 4px; }
+  .lead { color: var(--muted); margin: 0 0 28px; font-family: system-ui, sans-serif; font-size: .95rem; }
+
+  .progress { display: flex; gap: 6px; margin-bottom: 24px; }
+  .progress span { flex: 1; height: 6px; border-radius: 3px; background: var(--line); }
+  .progress span.on { background: var(--accent); }
+  .progress span.done { background: var(--done); }
+
+  .step {
+    background: var(--paper); border: 1px solid var(--line); border-radius: 10px;
+    padding: 24px 22px; margin-bottom: 20px;
+  }
+  .step[hidden] { display: none; }
+  .step h2 { margin: 0 0 6px; font-size: 1.25rem; }
+  .task { margin: 0 0 20px; font-weight: bold; }
+
+  label { display: block; margin-bottom: 16px; font-family: system-ui, sans-serif; font-size: .92rem; color: var(--muted); }
+  input[type=text], input[type=url], textarea {
+    display: block; width: 100%; margin-top: 5px; padding: 10px 12px;
+    font: 1rem system-ui, sans-serif; color: var(--ink); background: var(--bg);
+    border: 1px solid var(--line); border-radius: 6px;
+  }
+  textarea { min-height: 76px; resize: vertical; }
+  input:focus, textarea:focus, button:focus-visible, summary:focus-visible, a:focus-visible {
+    outline: 3px solid var(--accent); outline-offset: 1px;
+  }
+  .invalid { border-color: #c0392b !important; }
+
+  details { border: 1px solid var(--line); border-radius: 8px; padding: 0 14px; margin: 22px 0; font-family: system-ui, sans-serif; }
+  summary { cursor: pointer; padding: 12px 0; font-weight: 600; font-size: .95rem; }
+  details[open] summary { border-bottom: 1px solid var(--line); margin-bottom: 14px; }
+  details .body { padding-bottom: 6px; }
+  .prompt { background: var(--bg); border-left: 4px solid var(--accent); padding: 10px 12px; border-radius: 4px; color: var(--muted); font-size: .92rem; }
+  a { color: var(--accent); }
+
+  .next {
+    display: inline-block; padding: 12px 20px; border: 0; border-radius: 8px; cursor: pointer;
+    background: var(--accent); color: var(--accent-ink); font: 600 1rem system-ui, sans-serif;
+  }
+  .next:hover { filter: brightness(1.08); }
+  .error { color: #c0392b; font: .9rem system-ui, sans-serif; margin: 0 0 12px; min-height: 1.2em; }
+  .placeholder { color: var(--muted); font-family: system-ui, sans-serif; }
+  .reset { background: none; border: 0; color: var(--muted); font: .85rem system-ui, sans-serif; cursor: pointer; text-decoration: underline; padding: 0; }
+  .step.collapsed .fields, .step.collapsed details, .step.collapsed .actions { display: none; }
+  .step.collapsed { padding: 14px 22px; }
+  .step.collapsed h2 { font-size: 1rem; color: var(--done); margin: 0; }
+  .step.collapsed .task { display: none; }
+  .summary { color: var(--muted); font: .95rem/1.7 system-ui, sans-serif; margin: 8px 0 0; }
+  .copy {
+    display: inline; padding: 1px 6px; margin: 0; border: 1px dashed var(--line); border-radius: 5px;
+    background: var(--bg); color: var(--ink); font: inherit; text-align: left; cursor: pointer;
+  }
+  .copy:hover { border-color: var(--accent); }
+  .linkbtn {
+    padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: default;
+  }
+  .backicon { display: none; }
+  .step.collapsed .linkbtn { color: var(--accent); cursor: pointer; text-decoration: underline; }
+  .step.collapsed .backicon { display: inline; }
+  .how { margin: 0 0 12px; padding-left: 20px; font-size: .95rem; }
+  .hint { color: var(--muted); font-size: .88rem; }
+  .next.small { padding: 8px 14px; font-size: .92rem; }
+  details.inner { margin: 8px 0; }
+  pre { white-space: pre-wrap; max-height: 260px; overflow: auto; font: .82rem/1.45 system-ui, sans-serif; background: var(--bg); padding: 10px; border-radius: 6px; margin: 0 0 12px; }
+  #answer { min-height: 150px; }
+  #contacts, #tasks { min-height: 110px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Проводник по претензии</h1>
+  <p class="lead">Один алгоритм каждый раз. Идём по шагам, не перескакивая вперёд.</p>
+
+  <div class="progress" id="progress" aria-hidden="true"></div>
+
+  <!-- ШАГ 1 -->
+  <section class="step" id="step-1">
+    <h2><button type="button" class="linkbtn" id="back-1">Шаг 1. Прочитать претензию<span class="backicon"> 🔙</span></button></h2>
+    <p class="task">Прочитайте претензию и заполните поля ниже.</p>
+    <div class="summary" id="sum-1" hidden></div>
+
+    <details id="helper" open>
+      <summary>Помощник DeepSeek: разобрать чат с клиентом</summary>
+      <div class="body">
+        <ol class="how">
+          <li><a href="https://chat.deepseek.com/" target="_blank" rel="noopener">Откройте новый чат DeepSeek</a> и вставьте промт (кнопка ниже).</li>
+          <li>Когда DeepSeek ответит «Жду», вставьте текст чата с клиентом.</li>
+          <li>Вставьте ответ DeepSeek сюда и нажмите «Разобрать».</li>
+        </ol>
+        <p><button class="next small" id="copy-prompt" type="button">📋 Скопировать промт step001</button> <span class="hint" id="prompt-state" role="status"></span></p>
+        <details class="inner"><summary>Показать текст промта</summary><pre id="prompt-text"></pre></details>
+        <label style="margin-top:14px">Ссылка на этот чат DeepSeek (чтобы вернуться к нему на следующих шагах)
+          <input type="url" id="chatlink" placeholder="https://chat.deepseek.com/...">
+        </label>
+        <label>Ответ DeepSeek
+          <textarea id="answer" placeholder="ЗАКАЗ: ...&#10;ПРОБЛЕМА: ...&#10;ТРЕБОВАНИЕ: ..."></textarea>
+        </label>
+        <button class="next" id="parse" type="button">Разобрать ответ и заполнить поля</button>
+        <p class="hint" id="parse-msg" role="status"></p>
+      </div>
+    </details>
+
+    <div class="fields">
+      <label>Номер вашего тикета
+        <input type="text" id="ticket" autocomplete="off">
+      </label>
+      <label>Номер заказа
+        <input type="text" id="order" autocomplete="off">
+      </label>
+      <label>Суть проблемы клиента
+        <textarea id="problem"></textarea>
+      </label>
+      <label>Что требует клиент (одно предложение)
+        <textarea id="demand"></textarea>
+      </label>
+      <label>Требование менялось позже?
+        <input type="text" id="changed" autocomplete="off">
+      </label>
+      <label>Юридические упоминания
+        <input type="text" id="legal" autocomplete="off">
+      </label>
+      <label>Контакты: кто уже общался с клиентом
+        <textarea id="contacts"></textarea>
+      </label>
+      <label>Задачи из чата
+        <textarea id="tasks"></textarea>
+      </label>
+    </div>
+
+    <div class="actions">
+      <p class="error" id="err-1" role="alert"></p>
+      <button class="next" id="next-1" type="button">Далее к блоку «Что произошло»</button>
+    </div>
+  </section>
+
+  <!-- ШАГ 2 (заглушка, будет добавлен позже) -->
+  <section class="step" id="step-2" hidden>
+    <h2>Шаг 2. Что произошло</h2>
+    <p class="placeholder">Этот шаг мы ещё напишем.</p>
+  </section>
+
+  <p><button class="reset" id="reset" type="button">Начать новую претензию</button></p>
+</main>
+
+<script>
+  const TOTAL = 10;
+  const FIELDS = ["ticket", "order", "problem", "demand", "changed", "legal", "contacts", "tasks", "chatlink", "answer"];
+  let current = 1;
+
+  function save() {
+    try {
+      const data = { current };
+      FIELDS.forEach(f => data[f] = document.getElementById(f).value);
+      localStorage.setItem("claim-guide", JSON.stringify(data));
+    } catch (e) {}
+  }
+
+  function load() {
+    try {
+      const data = JSON.parse(localStorage.getItem("claim-guide") || "null");
+      if (!data) return;
+      FIELDS.forEach(f => { if (data[f]) document.getElementById(f).value = data[f]; });
+      current = data.current || 1;
+    } catch (e) {}
+  }
+
+  function renderProgress() {
+    const bar = document.getElementById("progress");
+    bar.innerHTML = "";
+    for (let i = 1; i <= TOTAL; i++) {
+      const s = document.createElement("span");
+      if (i < current) s.className = "done";
+      else if (i === current) s.className = "on";
+      bar.appendChild(s);
+    }
+  }
+
+  function render() {
+    renderProgress();
+    const s1 = document.getElementById("step-1");
+    const s2 = document.getElementById("step-2");
+    const sum = document.getElementById("sum-1");
+    if (current > 1) {
+      s1.classList.add("collapsed");
+      sum.hidden = false;
+      sum.textContent = "";
+      sum.append("Тикет ", copyBtn(val("ticket")), ", заказ ", copyBtn(val("order")),
+                 ". Требование: ", copyBtn(val("demand")));
+      const link = val("chatlink");
+      if (/^https?:\/\//i.test(link)) sum.append(document.createElement("br"), deepseekLink(link));
+      s2.hidden = false;
+    } else {
+      s1.classList.remove("collapsed");
+      sum.hidden = true;
+      s2.hidden = true;
+    }
+  }
+
+  function val(id) { return document.getElementById(id).value.trim(); }
+
+  document.getElementById("next-1").addEventListener("click", () => {
+    const err = document.getElementById("err-1");
+    const required = ["ticket", "order", "demand"];
+    let empty = false;
+    required.forEach(id => {
+      const el = document.getElementById(id);
+      const bad = !el.value.trim();
+      el.classList.toggle("invalid", bad);
+      if (bad) empty = true;
+    });
+    if (empty) {
+      err.textContent = "Заполните номер тикета, номер заказа и требование клиента.";
+      return;
+    }
+    err.textContent = "";
+    current = 2;
+    save(); render();
+    document.getElementById("step-2").scrollIntoView();
+  });
+
+  function copyBtn(text) {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "copy";
+    b.title = "Нажмите, чтобы скопировать";
+    const t = document.createElement("span");
+    t.textContent = text;
+    const icon = document.createElement("span");
+    icon.textContent = " 📋";
+    b.append(t, icon);
+    b.addEventListener("click", () => copyText(text, icon));
+    return b;
+  }
+
+  async function copyText(text, icon) {
+    let ok = false;
+    try {
+      await navigator.clipboard.writeText(text);
+      ok = true;
+    } catch (e) {
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      try { ok = document.execCommand("copy"); } catch (e2) {}
+      ta.remove();
+    }
+    if (icon) {
+      icon.textContent = ok ? " ✅" : " ⚠️";
+      setTimeout(() => { icon.textContent = " 📋"; }, 1500);
+    }
+    return ok;
+  }
+
+  document.getElementById("back-1").addEventListener("click", () => {
+    if (current > 1) {
+      current = 1; save(); render();
+      document.getElementById("step-1").scrollIntoView();
+    }
+  });
+
+  FIELDS.forEach(f => document.getElementById(f).addEventListener("input", save));
+
+  document.getElementById("reset").addEventListener("click", () => {
+    if (!confirm("Очистить все поля и начать заново?")) return;
+    FIELDS.forEach(f => document.getElementById(f).value = "");
+    current = 1; save(); render();
+    window.scrollTo(0, 0);
+  });
+
+  function deepseekLink(url) {
+    const a = document.createElement("a");
+    a.href = url; a.target = "_blank"; a.rel = "noopener";
+    const img = document.createElement("img");
+    img.src = "https://chat.deepseek.com/favicon.ico";
+    img.alt = ""; img.width = 16; img.height = 16;
+    img.style.cssText = "vertical-align:-3px;margin-right:6px";
+    img.onerror = () => img.replaceWith(document.createTextNode("🐳 "));
+    a.append(img, "Чат DeepSeek");
+    return a;
+  }
+
+  const LABELS = { "ЗАКАЗ": "order", "ПРОБЛЕМА": "problem", "ТРЕБОВАНИЕ": "demand", "ИЗМЕНЕНИЕ": "changed",
+                   "ЮРИДИЧЕСКОЕ": "legal", "КОНТАКТЫ": "contacts", "ЗАДАЧИ": "tasks" };
+  const NAMES = { order: "заказ", problem: "проблема", demand: "требование", changed: "изменение",
+                  legal: "юридическое", contacts: "контакты", tasks: "задачи" };
+  const STRIP_QUOTE = ["problem", "demand", "changed", "legal"];
+
+  function parseAnswer(text) {
+    const raw = {}; let key = null;
+    text.split(/\r?\n/).forEach(l => {
+      const line = l.replace(/\*+/g, "").trim();
+      const m = line.replace(/^\d+[.)]\s*/, "").match(/^([A-Za-zА-Яа-яЁё]+)\s*:\s*(.*)$/);
+      const field = m && LABELS[m[1].toUpperCase()];
+      if (field) { key = field; raw[key] = m[2] ? [m[2]] : []; }
+      else if (key && line) raw[key].push(line);
+    });
+    const res = {};
+    for (const k in raw) {
+      let v = raw[k].join("\n").trim();
+      if (STRIP_QUOTE.includes(k)) v = v.replace(/\s*[—–-]\s*[«"„“].*$/s, "").trim();
+      if (k === "order") { const n = v.match(/\d[\d-]{4,}\d/); if (n) v = n[0]; }
+      if (!v || /^не найден/i.test(v)) continue;
+      res[k] = v;
+    }
+    return res;
+  }
+
+  document.getElementById("parse").addEventListener("click", () => {
+    const msg = document.getElementById("parse-msg");
+    const res = parseAnswer(document.getElementById("answer").value);
+    const got = Object.keys(res);
+    if (!got.length) {
+      msg.textContent = "Не нашёл меток ЗАКАЗ:, ПРОБЛЕМА:, ТРЕБОВАНИЕ: и других. Вставьте ответ DeepSeek целиком.";
+      return;
+    }
+    got.forEach(k => { const el = document.getElementById(k); el.value = res[k]; el.classList.remove("invalid"); });
+    const miss = Object.keys(NAMES).filter(k => !(k in res)).map(k => NAMES[k]);
+    msg.textContent = "Заполнено: " + got.map(k => NAMES[k]).join(", ") + "." +
+      (miss.length ? " Не найдено: " + miss.join(", ") + "." : "") + " Номер тикета впишите сами.";
+    save();
+  });
+
+  let promptText = "";
+  async function loadPrompt() {
+    const st = document.getElementById("prompt-state");
+    try {
+      const r = await fetch("prompts/step001.md", { cache: "no-store" });
+      if (!r.ok) throw new Error(r.status);
+      promptText = await r.text();
+      document.getElementById("prompt-text").textContent = promptText;
+    } catch (e) {
+      st.textContent = "Не удалось загрузить prompts/step001.md. Откройте страницу через GitHub Pages, а не файлом с диска.";
+    }
+  }
+  document.getElementById("copy-prompt").addEventListener("click", async () => {
+    if (!promptText) await loadPrompt();
+    if (!promptText) return;
+    const ok = await copyText(promptText);
+    const st = document.getElementById("prompt-state");
+    st.textContent = ok ? "Промт скопирован ✅" : "Не удалось скопировать ⚠️";
+    setTimeout(() => { st.textContent = ""; }, 2000);
+  });
+
+  loadPrompt();
+  load(); render();
+</script>
+</body>
+</html>
