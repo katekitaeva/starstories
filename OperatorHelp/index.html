@@ -98,7 +98,7 @@
   .sumtitle { font: 600 .85rem system-ui, sans-serif; color: var(--muted); }
   .srow { margin: 8px 0; font: .95rem/1.5 system-ui, sans-serif; }
   .slabel { display: block; font-size: .78rem; color: var(--muted); }
-  .step.collapsed .sumcard { display: none; }
+  .step.collapsed .sumcard, .step.collapsed .msg { display: none; }
   .fieldlabel { font: .92rem system-ui, sans-serif; color: var(--muted); margin-bottom: 6px; }
   .themepick { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
   .themepick select, .themepick input, .tlist select { font: .92rem system-ui, sans-serif; padding: 8px; background: var(--bg); color: var(--ink); border: 1px solid var(--line); border-radius: 6px; max-width: 100%; }
@@ -138,9 +138,9 @@
           <textarea id="answer" placeholder="ЗАКАЗ: ...&#10;ПРОБЛЕМА: ...&#10;ТРЕБОВАНИЕ: ..."></textarea>
         </label>
         <button class="next" id="parse" type="button">Разобрать ответ и заполнить поля</button>
-        <p class="hint" id="parse-msg" role="status"></p>
       </div>
     </details>
+    <p class="hint msg" id="parse-msg" role="status"></p>
 
     <div class="fields">
       <label>Номер вашего тикета
@@ -184,16 +184,16 @@
     <details id="helper2" open>
       <summary>Помощник DeepSeek: хронология, статус, темы</summary>
       <div class="body">
-        <p class="hint">Вставьте промт в тот же чат DeepSeek, где вы разбирали претензию. Текст чата заново вставлять не нужно. Если в тикете уже стоят темы, напишите их следом за промтом.</p>
+        <p class="hint">Вставьте промт <span id="chat-link-slot">в тот же чат DeepSeek, где вы разбирали претензию</span>. Текст чата заново вставлять не нужно. DeepSeek сначала спросит, проставлены ли в тикете уже какие-то темы: ответьте ему, перечислив их, или напишите «нет».</p>
         <p><button class="next small" id="copy-prompt2" type="button">📋 Скопировать промт step002</button> <span class="hint" id="prompt2-state" role="status"></span></p>
         <details class="inner"><summary>Показать текст промта</summary><pre id="prompt2-text"></pre></details>
         <label style="margin-top:14px">Ответ DeepSeek
           <textarea id="answer2" placeholder="ХРОНОЛОГИЯ:&#10;СТАТУС:&#10;ТЕМЫ:"></textarea>
         </label>
         <button class="next" id="parse2" type="button">Разобрать ответ и заполнить поля</button>
-        <p class="hint" id="parse2-msg" role="status"></p>
       </div>
     </details>
+    <p class="hint msg" id="parse2-msg" role="status"></p>
 
     <div class="fields">
       <label>Хронология (по порядку событий)
@@ -287,6 +287,14 @@
     rows.forEach(([label, id]) => { const v = val(id); if (v) add(label, copyBtn(v)); });
     const link = val("chatlink");
     if (/^https?:\/\//i.test(link)) add("Чат DeepSeek", deepseekLink(link));
+    const slot = document.getElementById("chat-link-slot");
+    const phrase = "в тот же чат DeepSeek, где вы разбирали претензию";
+    slot.textContent = "";
+    if (/^https?:\/\//i.test(link)) {
+      const a = document.createElement("a");
+      a.href = link; a.target = "_blank"; a.rel = "noopener"; a.textContent = phrase;
+      slot.appendChild(a);
+    } else slot.textContent = phrase;
   }
 
   function val(id) { return document.getElementById(id).value.trim(); }
@@ -414,6 +422,7 @@
     const miss = Object.keys(NAMES).filter(k => !(k in res)).map(k => NAMES[k]);
     msg.textContent = "Заполнено: " + got.map(k => NAMES[k]).join(", ") + "." +
       (miss.length ? " Не найдено: " + miss.join(", ") + "." : "") + " Номер тикета впишите сами.";
+    document.getElementById("helper").open = false;
     save();
   });
 
@@ -569,6 +578,7 @@
       renderThemes(); done.push("темы");
     }
     msg.textContent = "Заполнено: " + done.join(", ") + "." + (unknown ? " Тем вне списка: " + unknown + " (отмечены ⚠️), проверьте." : "");
+    document.getElementById("helper2").open = false;
     save();
   });
 
