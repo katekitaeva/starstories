@@ -77,7 +77,7 @@
   .step.collapsed .task { display: none; }
   .summary { color: var(--muted); font: .95rem/1.7 system-ui, sans-serif; margin: 8px 0 0; }
   .copy {
-    display: inline; padding: 1px 6px; margin: 0; border: 1px dashed var(--line); border-radius: 5px;
+    display: inline-block; max-width: 100%; white-space: pre-wrap; padding: 1px 6px; margin: 0; border: 1px dashed var(--line); border-radius: 5px;
     background: var(--bg); color: var(--ink); font: inherit; text-align: left; cursor: pointer;
   }
   .copy:hover { border-color: var(--accent); }
@@ -94,6 +94,19 @@
   pre { white-space: pre-wrap; max-height: 260px; overflow: auto; font: .82rem/1.45 system-ui, sans-serif; background: var(--bg); padding: 10px; border-radius: 6px; margin: 0 0 12px; }
   #answer { min-height: 150px; }
   #contacts, #tasks { min-height: 110px; }
+  .sumcard { border: 1px solid var(--line); border-radius: 8px; padding: 10px 14px; margin: 12px 0 18px; background: var(--bg); }
+  .sumtitle { font: 600 .85rem system-ui, sans-serif; color: var(--muted); }
+  .srow { margin: 8px 0; font: .95rem/1.5 system-ui, sans-serif; }
+  .slabel { display: block; font-size: .78rem; color: var(--muted); }
+  .step.collapsed .sumcard { display: none; }
+  .fieldlabel { font: .92rem system-ui, sans-serif; color: var(--muted); margin-bottom: 6px; }
+  .themepick { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+  .themepick select, .themepick input, .tlist select { font: .92rem system-ui, sans-serif; padding: 8px; background: var(--bg); color: var(--ink); border: 1px solid var(--line); border-radius: 6px; max-width: 100%; }
+  .tlist { list-style: none; padding: 0; margin: 8px 0 16px; }
+  .tlist li { display: flex; gap: 8px; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--line); font: .92rem system-ui, sans-serif; }
+  .tlist li span { flex: 1; }
+  .x { border: 0; background: none; color: var(--muted); cursor: pointer; font-size: 1rem; }
+  #chrono, #status { min-height: 140px; }
 </style>
 </head>
 <body>
@@ -105,9 +118,8 @@
 
   <!-- ШАГ 1 -->
   <section class="step" id="step-1">
-    <h2><button type="button" class="linkbtn" id="back-1">Шаг 1. Прочитать претензию<span class="backicon"> 🔙</span></button></h2>
+    <h2><button type="button" class="linkbtn" data-n="1">Шаг 1. Прочитать претензию<span class="backicon"> 🔙</span></button></h2>
     <p class="task">Прочитайте претензию и заполните поля ниже.</p>
-    <div class="summary" id="sum-1" hidden></div>
 
     <details id="helper" open>
       <summary>Помощник DeepSeek: разобрать чат с клиентом</summary>
@@ -163,9 +175,54 @@
     </div>
   </section>
 
-  <!-- ШАГ 2 (заглушка, будет добавлен позже) -->
+  <!-- ШАГ 2 -->
   <section class="step" id="step-2" hidden>
-    <h2>Шаг 2. Что произошло</h2>
+    <h2><button type="button" class="linkbtn" data-n="2">Шаг 2. Что произошло<span class="backicon"> 🔙</span></button></h2>
+    <div class="sumcard"><div class="sumtitle">Сводка шага 1 (нажмите на значение, чтобы скопировать)</div><div id="sum-card"></div></div>
+    <p class="task">Восстановите ход событий и определите темы обращения.</p>
+
+    <details id="helper2" open>
+      <summary>Помощник DeepSeek: хронология, статус, темы</summary>
+      <div class="body">
+        <p class="hint">Вставьте промт в тот же чат DeepSeek, где вы разбирали претензию. Текст чата заново вставлять не нужно. Если в тикете уже стоят темы, напишите их следом за промтом.</p>
+        <p><button class="next small" id="copy-prompt2" type="button">📋 Скопировать промт step002</button> <span class="hint" id="prompt2-state" role="status"></span></p>
+        <details class="inner"><summary>Показать текст промта</summary><pre id="prompt2-text"></pre></details>
+        <label style="margin-top:14px">Ответ DeepSeek
+          <textarea id="answer2" placeholder="ХРОНОЛОГИЯ:&#10;СТАТУС:&#10;ТЕМЫ:"></textarea>
+        </label>
+        <button class="next" id="parse2" type="button">Разобрать ответ и заполнить поля</button>
+        <p class="hint" id="parse2-msg" role="status"></p>
+      </div>
+    </details>
+
+    <div class="fields">
+      <label>Хронология (по порядку событий)
+        <textarea id="chrono"></textarea>
+      </label>
+      <label>Текущий статус: обещано, сделано, открыто
+        <textarea id="status"></textarea>
+      </label>
+      <div class="fieldlabel">Темы обращения</div>
+      <div class="themepick">
+        <select id="t1" aria-label="Тип"></select>
+        <select id="t2" aria-label="Подтип" hidden></select>
+        <select id="t3" aria-label="Уточнение" hidden></select>
+        <input type="text" id="theme-manual" placeholder="или впишите тему вручную">
+        <button class="next small" id="add-theme" type="button">Добавить тему</button>
+      </div>
+      <p class="hint" id="theme-hint"></p>
+      <ul class="tlist" id="theme-list"></ul>
+    </div>
+
+    <div class="actions">
+      <p class="error" id="err-2" role="alert"></p>
+      <button class="next" id="next-2" type="button">Далее к блоку «История в CRM»</button>
+    </div>
+  </section>
+
+  <!-- ШАГ 3 (заглушка) -->
+  <section class="step" id="step-3" hidden>
+    <h2>Шаг 3. История в CRM</h2>
     <p class="placeholder">Этот шаг мы ещё напишем.</p>
   </section>
 
@@ -174,12 +231,13 @@
 
 <script>
   const TOTAL = 10;
-  const FIELDS = ["ticket", "order", "problem", "demand", "changed", "legal", "contacts", "tasks", "chatlink", "answer"];
+  const FIELDS = ["ticket", "order", "problem", "demand", "changed", "legal", "contacts", "tasks", "chatlink", "answer", "chrono", "status", "answer2"];
   let current = 1;
+  let themes = [];
 
   function save() {
     try {
-      const data = { current };
+      const data = { current, themes };
       FIELDS.forEach(f => data[f] = document.getElementById(f).value);
       localStorage.setItem("claim-guide", JSON.stringify(data));
     } catch (e) {}
@@ -191,6 +249,7 @@
       if (!data) return;
       FIELDS.forEach(f => { if (data[f]) document.getElementById(f).value = data[f]; });
       current = data.current || 1;
+      themes = data.themes || [];
     } catch (e) {}
   }
 
@@ -207,23 +266,27 @@
 
   function render() {
     renderProgress();
-    const s1 = document.getElementById("step-1");
-    const s2 = document.getElementById("step-2");
-    const sum = document.getElementById("sum-1");
-    if (current > 1) {
-      s1.classList.add("collapsed");
-      sum.hidden = false;
-      sum.textContent = "";
-      sum.append("Тикет ", copyBtn(val("ticket")), ", заказ ", copyBtn(val("order")),
-                 ". Требование: ", copyBtn(val("demand")));
-      const link = val("chatlink");
-      if (/^https?:\/\//i.test(link)) sum.append(document.createElement("br"), deepseekLink(link));
-      s2.hidden = false;
-    } else {
-      s1.classList.remove("collapsed");
-      sum.hidden = true;
-      s2.hidden = true;
+    for (let n = 1; n <= 3; n++) {
+      const el = document.getElementById("step-" + n);
+      el.hidden = n > current;
+      el.classList.toggle("collapsed", n < current);
     }
+    if (current >= 2) renderSummary();
+  }
+
+  function renderSummary() {
+    const box = document.getElementById("sum-card");
+    box.textContent = "";
+    const rows = [["Тикет", "ticket"], ["Заказ", "order"], ["Проблема", "problem"], ["Требование", "demand"],
+                  ["Менялось позже", "changed"], ["Юридические упоминания", "legal"], ["Контакты", "contacts"], ["Задачи", "tasks"]];
+    const add = (label, node) => {
+      const r = document.createElement("div"); r.className = "srow";
+      const l = document.createElement("span"); l.className = "slabel"; l.textContent = label;
+      r.append(l, node); box.appendChild(r);
+    };
+    rows.forEach(([label, id]) => { const v = val(id); if (v) add(label, copyBtn(v)); });
+    const link = val("chatlink");
+    if (/^https?:\/\//i.test(link)) add("Чат DeepSeek", deepseekLink(link));
   }
 
   function val(id) { return document.getElementById(id).value.trim(); }
@@ -284,19 +347,20 @@
     return ok;
   }
 
-  document.getElementById("back-1").addEventListener("click", () => {
-    if (current > 1) {
-      current = 1; save(); render();
-      document.getElementById("step-1").scrollIntoView();
+  document.querySelectorAll(".linkbtn").forEach(b => b.addEventListener("click", () => {
+    const n = +b.dataset.n;
+    if (current > n) {
+      current = n; save(); render();
+      document.getElementById("step-" + n).scrollIntoView();
     }
-  });
+  }));
 
   FIELDS.forEach(f => document.getElementById(f).addEventListener("input", save));
 
   document.getElementById("reset").addEventListener("click", () => {
     if (!confirm("Очистить все поля и начать заново?")) return;
     FIELDS.forEach(f => document.getElementById(f).value = "");
-    current = 1; save(); render();
+    current = 1; themes = []; renderThemes(); save(); render();
     window.scrollTo(0, 0);
   });
 
@@ -318,12 +382,12 @@
                   legal: "юридическое", contacts: "контакты", tasks: "задачи" };
   const STRIP_QUOTE = ["problem", "demand", "changed", "legal"];
 
-  function parseAnswer(text) {
+  function parseAnswer(text, labels = LABELS) {
     const raw = {}; let key = null;
     text.split(/\r?\n/).forEach(l => {
       const line = l.replace(/\*+/g, "").trim();
       const m = line.replace(/^\d+[.)]\s*/, "").match(/^([A-Za-zА-Яа-яЁё]+)\s*:\s*(.*)$/);
-      const field = m && LABELS[m[1].toUpperCase()];
+      const field = m && labels[m[1].toUpperCase()];
       if (field) { key = field; raw[key] = m[2] ? [m[2]] : []; }
       else if (key && line) raw[key].push(line);
     });
@@ -374,8 +438,157 @@
     setTimeout(() => { st.textContent = ""; }, 2000);
   });
 
+  /* ---------- Шаг 2 ---------- */
+  const LABELS2 = { "ХРОНОЛОГИЯ": "chrono", "СТАТУС": "status", "ТЕМЫ": "themes" };
+  const norm = x => x.toLowerCase().replace(/\s+/g, " ").trim();
+  let TYPES = [], TYPE_MAP = {}, TYPE_LINES = [];
+  const sels = ["t1", "t2", "t3"].map(id => document.getElementById(id));
+
+  function indexTypes(nodes, prefix) {
+    nodes.forEach(n => {
+      const path = [...prefix, n.name].join(" > ");
+      TYPE_MAP[norm(path)] = { path, comment: n.comment || "" };
+      TYPE_LINES.push(path + (n.comment ? " — подсказка: " + n.comment : ""));
+      indexTypes(n.children || [], [...prefix, n.name]);
+    });
+  }
+  function levelList(k) {
+    let list = TYPES;
+    for (let j = 0; j < k; j++) { const v = sels[j].value; if (v === "") return []; list = list[+v].children || []; }
+    return list;
+  }
+  function fillLevel(k) {
+    const s = sels[k], list = levelList(k);
+    s.innerHTML = "";
+    s.add(new Option(["Тип", "Подтип", "Уточнение"][k] + "…", ""));
+    list.forEach((n, i) => s.add(new Option(n.name, i)));
+    s.hidden = !list.length;
+  }
+  function picked() {
+    const names = []; let list = TYPES, comment = "";
+    for (const s of sels) {
+      if (s.value === "") break;
+      const n = list[+s.value]; names.push(n.name);
+      if (n.comment) comment = n.comment;
+      list = n.children || [];
+    }
+    return { path: names.join(" > "), comment };
+  }
+  sels.forEach((s, i) => s.addEventListener("change", () => {
+    for (let k = i + 1; k < 3; k++) fillLevel(k);
+    document.getElementById("theme-hint").textContent = picked().comment ? "Подсказка: " + picked().comment : "";
+  }));
+
+  async function loadTypes() {
+    try {
+      const r = await fetch("data/claim-types.json", { cache: "no-store" });
+      if (!r.ok) throw new Error(r.status);
+      TYPES = (await r.json()).types || [];
+      indexTypes(TYPES, []);
+      fillLevel(0);
+    } catch (e) {
+      document.getElementById("theme-hint").textContent = "Список тем не загружен (data/claim-types.json). Темы можно вписывать вручную.";
+      sels[0].hidden = true;
+    }
+  }
+
+  function addTheme(path, status, note) {
+    const hit = TYPE_MAP[norm(path)];
+    const p = hit ? hit.path : path;
+    if (themes.some(t => norm(t.path) === norm(p))) return;
+    themes.push({ path: p, status, note: note || "", unknown: TYPES.length > 0 && !hit });
+  }
+  function renderThemes() {
+    const ul = document.getElementById("theme-list");
+    ul.innerHTML = "";
+    themes.forEach((t, i) => {
+      const li = document.createElement("li");
+      const name = document.createElement("span");
+      name.textContent = t.path + (t.unknown ? " ⚠️ нет в списке" : "");
+      if (t.note) name.title = t.note;
+      const st = document.createElement("select");
+      st.add(new Option("в тикете", "в тикете")); st.add(new Option("добавляю я", "добавляю"));
+      st.value = t.status;
+      st.addEventListener("change", () => { t.status = st.value; save(); });
+      const del = document.createElement("button");
+      del.type = "button"; del.className = "x"; del.textContent = "✕"; del.setAttribute("aria-label", "Убрать тему");
+      del.addEventListener("click", () => { themes.splice(i, 1); save(); renderThemes(); });
+      li.append(name, st, del);
+      ul.appendChild(li);
+    });
+  }
+  document.getElementById("add-theme").addEventListener("click", () => {
+    const path = val("theme-manual") || picked().path;
+    if (!path) return;
+    addTheme(path, "добавляю", "");
+    document.getElementById("theme-manual").value = "";
+    sels[0].value = ""; for (let k = 1; k < 3; k++) fillLevel(k);
+    document.getElementById("theme-hint").textContent = "";
+    save(); renderThemes();
+  });
+
+  let prompt2Tpl = "";
+  const typesReady = loadTypes();
+  const prompt2Ready = fetch("prompts/step002.md", { cache: "no-store" })
+    .then(r => { if (!r.ok) throw new Error(r.status); return r.text(); })
+    .then(t => { prompt2Tpl = t; })
+    .catch(() => {});
+  function buildPrompt2() {
+    return prompt2Tpl.replace("{{ТИПЫ}}", TYPE_LINES.length ? TYPE_LINES.join("\n") : "(список тем не загружен)");
+  }
+  Promise.all([typesReady, prompt2Ready]).then(() => {
+    if (prompt2Tpl) document.getElementById("prompt2-text").textContent = buildPrompt2();
+  });
+  document.getElementById("copy-prompt2").addEventListener("click", async () => {
+    await Promise.all([typesReady, prompt2Ready]);
+    const st = document.getElementById("prompt2-state");
+    if (!prompt2Tpl) { st.textContent = "Не удалось загрузить prompts/step002.md. Откройте страницу через GitHub Pages."; return; }
+    const ok = await copyText(buildPrompt2());
+    st.textContent = ok ? (TYPE_LINES.length ? "Промт скопирован ✅" : "Скопирован без списка тем ⚠️ (data/claim-types.json не загружен)") : "Не удалось скопировать ⚠️";
+    setTimeout(() => { st.textContent = ""; }, 3500);
+  });
+
+  document.getElementById("parse2").addEventListener("click", () => {
+    const msg = document.getElementById("parse2-msg");
+    const res = parseAnswer(document.getElementById("answer2").value, LABELS2);
+    if (!Object.keys(res).length) {
+      msg.textContent = "Не нашёл меток ХРОНОЛОГИЯ:, СТАТУС:, ТЕМЫ:. Вставьте ответ DeepSeek целиком.";
+      return;
+    }
+    const done = [];
+    if (res.chrono) { document.getElementById("chrono").value = res.chrono; done.push("хронология"); }
+    if (res.status) { document.getElementById("status").value = res.status; done.push("статус"); }
+    let unknown = 0;
+    if (res.themes) {
+      res.themes.split("\n").forEach(line => {
+        const parts = line.replace(/^[-•]\s*/, "").split("|").map(x => x.trim());
+        if (!parts[0]) return;
+        addTheme(parts[0], /тикет/i.test(parts[1] || "") ? "в тикете" : "добавляю", parts[2] || "");
+      });
+      themes.forEach(t => { if (t.unknown) unknown++; });
+      renderThemes(); done.push("темы");
+    }
+    msg.textContent = "Заполнено: " + done.join(", ") + "." + (unknown ? " Тем вне списка: " + unknown + " (отмечены ⚠️), проверьте." : "");
+    save();
+  });
+
+  document.getElementById("next-2").addEventListener("click", () => {
+    const err = document.getElementById("err-2");
+    const bad = [];
+    ["chrono", "status"].forEach(id => {
+      const el = document.getElementById(id), empty = !el.value.trim();
+      el.classList.toggle("invalid", empty);
+      if (empty) bad.push(id === "chrono" ? "хронологию" : "статус");
+    });
+    if (!themes.length) bad.push("хотя бы одну тему");
+    if (bad.length) { err.textContent = "Заполните: " + bad.join(", ") + "."; return; }
+    err.textContent = "";
+    current = 3; save(); render();
+    document.getElementById("step-3").scrollIntoView();
+  });
+
   loadPrompt();
-  load(); render();
+  load(); renderThemes(); render();
 </script>
 </body>
 </html>
