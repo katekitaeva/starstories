@@ -1,3 +1,7 @@
+--- librarian.html (原始)
+
+
++++ librarian.html (修改后)
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -43,6 +47,10 @@ dl{display:grid;grid-template-columns:150px 1fr;gap:4px 12px;margin:0 0 10px;fon
 .leaf{display:block;width:100%;text-align:left;background:none;border:0;padding:5px 6px;border-radius:7px;color:var(--ink);font:inherit;cursor:pointer}
 .open{margin-left:10px;border:1px solid var(--line);background:var(--card);color:var(--ac);border-radius:999px;font-size:12px;padding:1px 10px;cursor:pointer}
 .leaf.sel,.open.sel{background:var(--info);color:var(--ac);font-weight:600}
+.del-btn{margin-left:8px;border:1px solid var(--line);background:var(--card);color:var(--er);border-radius:999px;font-size:12px;padding:1px 10px;cursor:pointer}
+.del-btn:hover{border-color:var(--er)}
+.leafrow{display:flex;align-items:center}.leafrow .leaf{flex:1;min-width:0}
+#vhead{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}#vhead .del-btn{margin-left:0}
 #view{margin-top:20px;border-top:1px solid var(--line);padding-top:16px}#view h3{margin:0 0 12px;font-size:17px}
 .md h1{font-size:22px;margin:0 0 10px}.md h2{font-size:18px;margin:20px 0 8px}.md h3,.md h4{font-size:16px;margin:16px 0 6px}.md p{margin:8px 0}.md ul,.md ol{margin:6px 0;padding-left:22px}.md .tw{margin:10px 0}
 .md code{background:var(--info);padding:1px 5px;border-radius:5px;font-size:.92em}.md pre code{background:none;padding:0}.md blockquote{margin:8px 0;padding:2px 12px;border-left:3px solid var(--line);color:var(--soft)}.md a{color:var(--ac)}.md hr{border:0;border-top:1px solid var(--line)}
@@ -74,7 +82,7 @@ dl{display:grid;grid-template-columns:150px 1fr;gap:4px 12px;margin:0 0 10px;fon
 <section><h2>Состояние библиотеки</h2><div class="row"><div><label for="age">Устаревшими считать старше (дней)</label><input id="age" type="number" value="30" min="1"></div></div>
 <div class="btns"><button class="btn" id="bOv">Обновить обзор</button></div><div id="ov"></div></section>
 <section><h2>Закэшированные страницы</h2><div id="tree"></div>
-<div id="view" hidden><h3 id="vhead"></h3><div id="vbody" class="md"></div></div></section>
+<div id="view" hidden><h3 id="vhead"><span id="vtitle"></span></h3><div id="vbody" class="md"></div></div></section>
 </div>
 </div>
 <script>
@@ -178,29 +186,79 @@ function download(){const c=cur;if(!c)return;const a=document.createElement("a")
 // ---- обзор библиотеки, дерево и просмотр
 function note(box,tx,c){const p=document.createElement("div");p.className="msg "+c;p.textContent=tx;box.append(p)}
 const relOf=k=>k.replace(/^https?:\/\/[^/]+\//,"").replace(/^cache\/pages\//,"").replace(/\.md$/,"").replace(/\/+$/,"");
+// ключ манифеста для записи: url/path из значения либо самого ключа, в «относительный» вид
+const keyOf=(v,k)=>{let x="";if(v&&typeof v==="object")x=v.url||v.path||"";if(!x)x=String(k==null?"":k);return relOf(x)};
+// удаляет из манифеста (рекурсивно: массив записей, объект-словарь или {pages:{...}}) все записи rel и его подстраниц; возвращает число удалённых
+function removeKeys(m,rel){let n=0;
+ const hit=r=>r===rel||r.startsWith(rel+"/");
+ // запись (объект с url/path) или ключ словаря — то же самое в «относительном» виде; relOf не трогает доменные ключи вида "shop/login"
+ const test=x=>hit(x&&typeof x==="object"?keyOf(x,""):relOf(String(x==null?"":x)));
+ const walk=o=>{if(Array.isArray(o)){for(let i=o.length-1;i>=0;i--)if(test(o[i])){o.splice(i,1);n++}}
+  else if(o&&typeof o==="object"){for(const k of Object.keys(o)){if(hit(relOf(k))){delete o[k];n++}else walk(o[k])}}};
+ walk(m);return n}
+let delBusy=false;
+async function delConfirm(title,detail){const w=document.createElement("div");w.className="msg wr";
+ const st=document.createElement("strong");st.textContent="Удалить «"+title+"» из репозитория?";
+ const d=document.createElement("div");d.style.marginTop="6px";d.textContent=detail;
+ const k=document.createElement("input");k.type="checkbox";k.style.width="auto";
+ const l=document.createElement("label");l.setAttribute("style","display:inline-flex;gap:8px;align-items:center;margin-top:8px;font-weight:400");l.append(k," Подтверждаю удаление (отменить нельзя — файл вернётся только повторным сохранением страницы)");
+ const b=document.createElement("button");b.className="del-btn";b.textContent="Удалить";b.style.cssText="margin-left:12px;flex:none";b.disabled=true;k.onchange=()=>b.disabled=!k.checked;
+ const pr=new Promise(res=>{b.onclick=()=>res(true)});w.append(st,d,l,b);$("ov").append(w);w.scrollIntoView({behavior:"smooth",block:"nearest"});return pr}
+// атомарное удаление одним коммитом через Git Data API: .md-файлы (blob с SHA нулей = delete) + обновлённый cache/manifest.json
+async function deleteCommit(files,rel,what){const c=cfg();if(delBusy)return false;delBusy=true;
+ try{
+ for(let n=0;n<2;n++){try{
+  let mj=null;const mt=await getText("cache/manifest.json");
+  if(mt!==null){try{const m=JSON.parse(mt);const rm=removeKeys(m,rel);mj=rm?JSON.stringify(m,null,2)+"\n":mt}catch(e){mj=mt}}
+  const ref=await gh("/git/ref/heads/"+encodeURIComponent(c.b)),cm=await gh("/git/commits/"+ref.object.sha);
+  const list=files.map(f=>[f,null]);if(mj!==null)list.push(["cache/manifest.json",mj]);
+  const tree=[];
+  for(const[p,t]of list){if(t===null)tree.push({path:p,mode:"100644",type:"blob",sha:"0000000000000000000000000000000000000000"});
+   else{const b=await gh("/git/blobs",{method:"POST",body:JSON.stringify({content:t,encoding:"utf-8"})});tree.push({path:p,mode:"100644",type:"blob",sha:b.sha})}}
+  const tr=await gh("/git/trees",{method:"POST",body:JSON.stringify({base_tree:cm.tree.sha,tree})});
+  const nc=await gh("/git/commits",{method:"POST",body:JSON.stringify({message:"Библиотека: удалена "+what+" "+rel,tree:tr.sha,parents:[ref.object.sha]})});
+  await gh("/git/refs/heads/"+encodeURIComponent(c.b),{method:"PATCH",body:JSON.stringify({sha:nc.sha,force:false})});
+  return true}
+ catch(e){if(n===0&&(e.status===409||e.status===422)){note($("ov"),"Репозиторий изменился, повторяю удаление","wr");continue}
+  note($("ov"),"Удаление не удалось: "+e.message,"er");return false}}
+ }finally{delBusy=false}}
+async function deletePage(r){const f="cache/pages"+r.rel+".md";
+ const ok=await delConfirm(r.title||r.rel,"Будет удалён файл "+f+" и запись о нём в cache/manifest.json.");if(!ok)return;
+ if(await deleteCommit([f],r.rel,"страницу")){note($("ov"),"Удалено: "+(r.title||r.rel),"ok");overview()}}
+async function deleteFolder(node){const rs=[];(function w(n){if(n.r)rs.push(n.r);Object.values(n.c).forEach(w)})(node);
+ if(!rs.length)return;
+ const files=rs.map(r=>"cache/pages"+r.rel+".md"),own=rs.filter(r=>r.rel===node.rel).length;
+ const ok=await delConfirm(node.name,"Файлов в папке (со всеми подпапками): "+files.length+(own?", из них самой папки: "+own:"")+". Будут удалены все .md-файлы и соответствующие записи в cache/manifest.json.");if(!ok)return;
+ if(await deleteCommit(files,node.rel,"папку")){note($("ov"),"Удалена папка "+node.rel+" ("+files.length+" файл(ов))","ok");overview()}}
+function mkDel(onDel){const b=document.createElement("button");b.className="del-btn";b.textContent="удалить";b.title="Удалить из репозитория вместе с записями в cache/manifest.json";b.onclick=e=>{e.preventDefault();e.stopPropagation();onDel()};return b}
 async function overview(){const o=$("ov"),tr=$("tree");o.textContent=tr.textContent="";$("view").hidden=true;
  if(!canWrite()){note(o,"Для обзора нужны токен и подключение к репозиторию","wr");return}
  try{const t=await getText("cache/manifest.json");if(!t){note(o,"Манифест не найден","er");return}const m=JSON.parse(t);
   const h=Array.isArray(m)?m:(m.pages&&typeof m.pages==="object"?m.pages:m);
-  const rows=(Array.isArray(h)?h.map(x=>[x&&(x.path||x.url),x]):Object.entries(h)).filter(([k,v])=>k&&v&&typeof v==="object").map(([k,v])=>({rel:relOf(k),title:v.title||"",d:v.fetchedAt||v.checkedAt||v.date||""}));
+  const rows=(Array.isArray(h)?h.map(x=>[x&&(x.path||x.url),x]):Object.entries(h)).filter(([k,v])=>k&&v&&typeof v==="object").map(([k,v])=>({rel:keyOf(v,k),key:keyOf(v,k),title:v.title||"",d:v.fetchedAt||v.checkedAt||v.date||""}));
   const lim=Date.now()-($("age").value||30)*864e5,old=rows.filter(r=>r.d&&Date.parse(r.d)<lim).sort((a,b)=>Date.parse(a.d)-Date.parse(b.d));
   note(o,"Страниц в библиотеке: "+rows.length+". Устаревших: "+old.length+". Без даты: "+rows.filter(r=>!r.d).length,"ok");
   if(old.length){const d=document.createElement("details"),s=document.createElement("summary");s.textContent="Устаревшие страницы ("+old.length+")";d.append(s);const w=document.createElement("div");w.className="tw";const tb=document.createElement("table");
    old.slice(0,15).forEach(r=>{const x=tb.insertRow();[r.rel,r.d.slice(0,10)].forEach(v=>x.insertCell().textContent=v)});w.append(tb);d.append(w);o.append(d)}
-  const root={c:{}};rows.forEach(r=>{let n=root;r.rel.split("/").forEach(s=>{n=n.c[s]=n.c[s]||{c:{},name:s}});n.r=r});fill(tr,root)}
+
+  const root={c:{},rel:""};rows.forEach(r=>{let n=root,p="";r.rel.split("/").forEach(s=>{p=p?p+"/"+s:s;n=n.c[s]=n.c[s]||{c:{},name:s,rel:p}});n.r=r});fill(tr,root)}
  catch(e){note(o,"Обзор не удался: "+e.message,"er")}}
 const lab=n=>(n.r&&n.r.title)||n.name;
 function fill(box,node){Object.keys(node.c).sort().forEach(k=>{const n=node.c[k];
  if(Object.keys(n.c).length){const d=document.createElement("details"),s=document.createElement("summary");s.append(lab(n));
   if(n.r){const b=document.createElement("button");b.className="open";b.textContent="открыть";b.onclick=e=>{e.preventDefault();e.stopPropagation();openPage(n.r,b)};s.append(b)}
+  s.append(mkDel(()=>deleteFolder(n)));
   d.append(s);const w=document.createElement("div");w.className="kids";fill(w,n);d.append(w);box.append(d)}
- else{const b=document.createElement("button");b.className="leaf";b.textContent=lab(n);b.onclick=()=>openPage(n.r,b);box.append(b)}})}
+ else{const row=document.createElement("div");row.className="leafrow";
+  const b=document.createElement("button");b.className="leaf";b.textContent=lab(n);b.onclick=()=>openPage(n.r,b);
+  row.append(b,mkDel(()=>deletePage(n.r)));box.append(row)}})}
 async function openPage(r,btn){document.querySelectorAll("#tree .sel").forEach(x=>x.classList.remove("sel"));btn.classList.add("sel");
- const v=$("view"),b=$("vbody"),f="cache/pages"+r.rel+".md";v.hidden=false;$("vhead").textContent=r.title||r.rel;b.textContent="Загрузка…";
+ const v=$("view"),b=$("vbody"),f="cache/pages"+r.rel+".md";v.hidden=false;$("vtitle").textContent=r.title||r.rel;
+ const vb=$("vhead");vb.querySelectorAll(".del-btn").forEach(x=>x.remove());vb.append(mkDel(()=>deletePage(r)));b.textContent="Загрузка…";
  try{let x=await getText(f);if(x===null){b.textContent="Файл не найден в репозитории: "+f;return}x=x.replace(/\r/g,"");
   const fm=x.match(/^---\n([\s\S]*?)\n---\n?/),meta=fm?fm[1]:"",body=fm?x.slice(fm[0].length):x;
   const g=k=>((meta.match(new RegExp("^"+k+":\\s*(.*)$","m"))||[])[1]||"").replace(/^"|"$/g,"");
-  $("vhead").textContent=(g("title")||r.title||r.rel)+(g("fetchedAt")?" · загружено "+g("fetchedAt").slice(0,10):"");mdRender(body,b)}
+  $("vtitle").textContent=(g("title")||r.title||r.rel)+(g("fetchedAt")?" · загружено "+g("fetchedAt").slice(0,10):"");mdRender(body,b)}
  catch(e){b.textContent="Не удалось открыть: "+e.message}
  v.scrollIntoView({behavior:"smooth",block:"nearest"})}
 // ---- безопасный рендер Markdown в DOM (без innerHTML)
