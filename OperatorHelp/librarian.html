@@ -136,7 +136,7 @@ async function parse(){$("msgs").textContent="";$("prev").hidden=true;$("bSave")
  if(!rules.length)warn.push(canWrite()?"Правила обезличивания не найдены в data/redaction.json":"Правила обезличивания не применены (нет токена): проверьте текст на персональные данные");
  const dm=body.slice(0,800).match(new RegExp("\\b\\d{1,2} ("+MON+") \\d{4}\\b"));
  const path=url.slice(DOMAIN.length),kids=[...cv.st.links].map(s=>s.split("\t")).filter(([a])=>a.startsWith(url+"/"));
- const hash=await sha(body),file="cache/pages/"+path+".md";
+ const hash=await sha(body),file="cache/pages"+path+".md";
  const md="---\nurl: "+url+"\ntitle: "+JSON.stringify(title)+"\nfetchedAt: "+new Date().toISOString()+"\nhash: "+hash+"\nchars: "+body.length+"\n---\n\n"+body+"\n";
  cur={url,path,title,date:dm?dm[0]:"",crumbs,body,hash,file,md,kids,img:cv.st.img,warn,entry:{url,title,fetchedAt:new Date().toISOString(),hash,chars:body.length}};
  show();$("bDl").disabled=false;await status()}
@@ -196,7 +196,7 @@ function fill(box,node){Object.keys(node.c).sort().forEach(k=>{const n=node.c[k]
   d.append(s);const w=document.createElement("div");w.className="kids";fill(w,n);d.append(w);box.append(d)}
  else{const b=document.createElement("button");b.className="leaf";b.textContent=lab(n);b.onclick=()=>openPage(n.r,b);box.append(b)}})}
 async function openPage(r,btn){document.querySelectorAll("#tree .sel").forEach(x=>x.classList.remove("sel"));btn.classList.add("sel");
- const v=$("view"),b=$("vbody"),f="cache/pages/"+r.rel+".md";v.hidden=false;$("vhead").textContent=r.title||r.rel;b.textContent="Загрузка…";
+ const v=$("view"),b=$("vbody"),f="cache/pages"+r.rel+".md";v.hidden=false;$("vhead").textContent=r.title||r.rel;b.textContent="Загрузка…";
  try{let x=await getText(f);if(x===null){b.textContent="Файл не найден в репозитории: "+f;return}x=x.replace(/\r/g,"");
   const fm=x.match(/^---\n([\s\S]*?)\n---\n?/),meta=fm?fm[1]:"",body=fm?x.slice(fm[0].length):x;
   const g=k=>((meta.match(new RegExp("^"+k+":\\s*(.*)$","m"))||[])[1]||"").replace(/^"|"$/g,"");
