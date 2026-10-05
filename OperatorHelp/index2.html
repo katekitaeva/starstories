@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Проводник по претензии</title>
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/components.css">
+<link rel="stylesheet" href="css/steps.css">
+</head>
+<body>
+<main>
+  <h1>Проводник по претензии</h1>
+  <p class="lead">Один алгоритм каждый раз. Идём по шагам, не перескакивая вперёд.</p>
+  <details class="conn" id="conn"><summary id="conn-sum">Подключение к operator-data: не настроено</summary>
+    <div class="body">
+      <label>Владелец (логин GitHub)<input type="text" id="c-owner" autocomplete="off"></label>
+      <label>Репозиторий<input type="text" id="c-repo" value="operator-data" autocomplete="off"></label>
+      <label>Ветка<input type="text" id="c-branch" value="main" autocomplete="off"></label>
+      <label>Токен (Fine-grained, Contents: Read)<input type="password" id="c-token" autocomplete="off"></label>
+      <button class="next small" id="c-save" type="button">Сохранить и проверить</button>
+      <button class="reset" id="c-forget" type="button">Забыть токен</button>
+      <p class="hint" id="c-msg" role="status"></p>
+    </div>
+  </details>
+
+  <div class="progress" id="progress" aria-hidden="true"></div>
+
+  <!-- ШАГ 1 -->
+  <section class="step" id="step-1">
+    <h2><button type="button" class="linkbtn" data-n="1">Шаг 1. Прочитать претензию<span class="backicon"> 🔙</span></button></h2>
+    <p class="task">Прочитайте претензию и заполните поля ниже.</p>
+
+    <details id="helper" open>
+      <summary>Помощник DeepSeek: разобрать чат с клиентом</summary>
+      <div class="body">
+        <ol class="how">
+          <li><a href="https://chat.deepseek.com/" target="_blank" rel="noopener">Откройте новый чат DeepSeek</a> и вставьте промт (кнопка ниже).</li>
+          <li>Когда DeepSeek ответит «Жду», вставьте текст чата с клиентом.</li>
+          <li>Вставьте ответ DeepSeek сюда и нажмите «Разобрать».</li>
+        </ol>
+        <p><button class="next small" id="copy-prompt" type="button">📋 Скопировать промт step001</button> <span class="hint" id="prompt-state" role="status"></span></p>
+        <details class="inner"><summary>Показать текст промта</summary><pre id="prompt-text"></pre></details>
+        <label style="margin-top:14px">Ссылка на этот чат DeepSeek (чтобы вернуться к нему на следующих шагах)
+          <input type="url" id="chatlink" placeholder="https://chat.deepseek.com/...">
+        </label>
+        <label>Ответ DeepSeek
+          <textarea id="answer" placeholder="ЗАКАЗ: ...&#10;ПРОБЛЕМА: ...&#10;ТРЕБОВАНИЕ: ..."></textarea>
+        </label>
+        <button class="next" id="parse" type="button">Разобрать ответ и заполнить поля</button>
+      </div>
+    </details>
+    <p class="hint msg" id="parse-msg" role="status"></p>
+
+    <div class="fields">
+      <label>Номер вашего тикета
+        <input type="text" id="ticket" autocomplete="off">
+      </label>
+      <label>Номер заказа
+        <input type="text" id="order" autocomplete="off">
+      </label>
+      <label>Суть проблемы клиента
+        <textarea id="problem"></textarea>
+      </label>
+      <label>Что требует клиент (одно предложение)
+        <textarea id="demand"></textarea>
+      </label>
+      <label>Требование менялось позже?
+        <input type="text" id="changed" autocomplete="off">
+      </label>
+      <label>Юридические упоминания
+        <input type="text" id="legal" autocomplete="off">
+      </label>
+      <label>Контакты: кто уже общался с клиентом
+        <textarea id="contacts"></textarea>
+      </label>
+      <label>Задачи из чата
+        <textarea id="tasks"></textarea>
+      </label>
+    </div>
+
+    <div class="actions">
+      <p class="error" id="err-1" role="alert"></p>
+      <button class="next" id="next-1" type="button">Далее к блоку «Что произошло»</button>
+    </div>
+  </section>
+
+  <!-- ШАГ 2 -->
+  <section class="step" id="step-2" hidden>
+    <h2><button type="button" class="linkbtn" data-n="2">Шаг 2. Что произошло<span class="backicon"> 🔙</span></button></h2>
+    <div class="sumcard"><div class="sumtitle">Сводка шага 1 (нажмите на значение, чтобы скопировать)</div><div id="sum-card"></div></div>
+    <p class="task">Восстановите ход событий и определите темы обращения.</p>
+
+    <details id="helper2" open>
+      <summary>Помощник DeepSeek: хронология, статус, темы</summary>
+      <div class="body">
+        <p class="hint">Вставьте промт <span id="chat-link-slot">в тот же чат DeepSeek, где вы разбирали претензию</span>. Текст чата заново вставлять не нужно. DeepSeek сначала спросит, проставлены ли в тикете уже какие-то темы: ответьте ему, перечислив их, или напишите «нет».</p>
+        <p><button class="next small" id="copy-prompt2" type="button">📋 Скопировать промт step002</button> <span class="hint" id="prompt2-state" role="status"></span></p>
+        <details class="inner"><summary>Показать текст промта</summary><pre id="prompt2-text"></pre></details>
+        <label style="margin-top:14px">Ответ DeepSeek
+          <textarea id="answer2" placeholder="ХРОНОЛОГИЯ:&#10;СТАТУС:&#10;ТЕМЫ:"></textarea>
+        </label>
+        <button class="next" id="parse2" type="button">Разобрать ответ и заполнить поля</button>
+      </div>
+    </details>
+    <p class="hint msg" id="parse2-msg" role="status"></p>
+
+    <div class="fields">
+      <label>Хронология (по порядку событий)
+        <textarea id="chrono"></textarea>
+      </label>
+      <label>Текущий статус: обещано, сделано, открыто
+        <textarea id="status"></textarea>
+      </label>
+      <div class="fieldlabel">Темы обращения</div>
+      <div class="themepick">
+        <select id="t1" aria-label="Тип"></select>
+        <select id="t2" aria-label="Подтип" hidden></select>
+        <select id="t3" aria-label="Уточнение" hidden></select>
+        <input type="text" id="theme-manual" placeholder="или впишите тему вручную">
+        <button class="next small" id="add-theme" type="button">Добавить тему</button>
+      </div>
+      <p class="hint" id="theme-hint"></p>
+      <ul class="tlist" id="theme-list"></ul>
+    </div>
+
+    <div class="actions">
+      <p class="error" id="err-2" role="alert"></p>
+      <button class="next" id="next-2" type="button">Далее к блоку «Контекст клиента»</button>
+    </div>
+  </section>
+
+  <!-- ШАГ 3 -->
+  <section class="step" id="step-3" hidden>
+    <h2><button type="button" class="linkbtn" data-n="3">Шаг 3. Контекст клиента<span class="backicon"> 🔙</span></button></h2>
+    <p class="task">Заполните по карточке клиента в CRM (вкладки «Клиент», «Коммуникации», «Заказы», «Баланс»).</p>
+    <div class="fields">
+      <div class="fieldlabel">Критичность ситуации</div>
+      <label class="chk"><input type="checkbox" id="k1"> обращение мамочки, человека с ограниченными возможностями или медийной личности</label>
+      <label class="chk"><input type="checkbox" id="k2"> заказ для гуманитарной помощи или благотворительности</label>
+      <label class="chk"><input type="checkbox" id="k3"> дорогой заказ</label>
+      <div class="fieldlabel" style="margin-top:12px">Метки на клиенте</div>
+      <label class="chk"><input type="checkbox" id="l1"> «фрод: злоупотребляет»</label>
+      <label class="chk"><input type="checkbox" id="l2"> «хамит, ругается»</label>
+      <label class="chk"><input type="checkbox" id="l3"> «бан купонов»</label>
+      <label class="chk"><input type="checkbox" id="l4"> негативные комментарии других подразделений</label>
+      <label style="margin-top:12px">Начислений по претензиям за 2 месяца<input type="number" id="c-acc" min="0"></label>
+      <label>Доля возвратов от заказов, %<input type="number" id="c-ret" min="0" max="100"></label>
+      <label>Доля отменённых заказов, %<input type="number" id="c-can" min="0" max="100"></label>
+      <label>Стоимость заказа, ₽<input type="number" id="c-sum" min="0"></label>
+      <label>Доходность и статус клиента (премиальный, медийный, плашка VIP), своими словами<input type="text" id="c-status" autocomplete="off"></label>
+    </div>
+    <div class="verdict" id="verdict"></div>
+    <div class="actions"><button class="next" id="next-3" type="button">Далее к блоку «Решение и тексты»</button></div>
+  </section>
+
+  <!-- ШАГ 4 -->
+  <section class="step" id="step-4" hidden>
+    <h2><button type="button" class="linkbtn" data-n="4">Шаг 4. Решение и тексты<span class="backicon"> 🔙</span></button></h2>
+    <p class="task">DeepSeek предложит варианты по инструкциям Loyalty, вы выберете, и он напишет чеклист, ответ клиенту и комментарий.</p>
+    <details id="helper4" open>
+      <summary>Помощник DeepSeek</summary>
+      <div class="body">
+        <ol class="how">
+          <li>Вставьте промт в тот же чат DeepSeek: он выдаст варианты и спросит ваш выбор.</li>
+          <li>Ответьте, какой вариант берёте и что уточняете (сумма, согласие клиента).</li>
+          <li>Вставьте итоговый ответ сюда и нажмите «Разобрать».</li>
+        </ol>
+        <div class="fieldlabel">Страницы инструкций в промте</div>
+        <div id="pages-list"></div>
+        <p><button class="next small" id="build-prompt" type="button">📋 Собрать и скопировать промт</button> <span class="hint" id="prompt4-state" role="status"></span></p>
+        <details class="inner"><summary>Показать промт</summary><pre id="prompt4-text"></pre></details>
+        <label style="margin-top:14px">Итоговый ответ DeepSeek
+          <textarea id="answer4" placeholder="ЧЕКЛИСТ:&#10;СООБЩЕНИЕ:&#10;КОММЕНТАРИЙ:"></textarea>
+        </label>
+        <button class="next" id="parse4" type="button">Разобрать ответ</button>
+      </div>
+    </details>
+    <p class="hint msg" id="parse4-msg" role="status"></p>
+    <div class="fields">
+      <div class="outbox"><label>Чеклист<textarea id="out-check"></textarea></label><button class="next small cp" data-for="out-check" type="button">📋 Копировать</button></div>
+      <div class="outbox"><label>Ответ клиенту в чате<textarea id="out-reply"></textarea></label><button class="next small cp" data-for="out-reply" type="button">📋 Копировать</button></div>
+      <div class="outbox"><label>Комментарий в тикете<textarea id="out-comment"></textarea></label><button class="next small cp" data-for="out-comment" type="button">📋 Копировать</button></div>
+      <p class="hint" id="ph-note"></p>
+    </div>
+  </section>
+
+  <p><button class="reset" id="reset" type="button">Начать новую претензию</button></p>
+</main>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>

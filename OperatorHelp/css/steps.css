@@ -1,0 +1,19 @@
+/* Состояние «свёрнутый шаг» и стили конкретных шагов */
+.step.collapsed .fields, .step.collapsed details, .step.collapsed .actions { display: none; }
+.step.collapsed { padding: 14px 22px; }
+.step.collapsed h2 { font-size: 1rem; color: var(--done); margin: 0; }
+.step.collapsed .task { display: none; }
+.backicon { display: none; }
+.step.collapsed .linkbtn { color: var(--accent); cursor: pointer; text-decoration: underline; }
+.step.collapsed .backicon { display: inline; }
+#answer { min-height: 150px; }
+#contacts, #tasks { min-height: 110px; }
+.step.collapsed .sumcard, .step.collapsed .msg { display: none; }
+.themepick { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+.themepick select, .themepick input, .tlist select { font: .92rem system-ui, sans-serif; padding: 8px; background: var(--bg); color: var(--ink); border: 1px solid var(--line); border-radius: 6px; max-width: 100%; }
+.tlist { list-style: none; padding: 0; margin: 8px 0 16px; }
+.tlist li { display: flex; gap: 8px; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--line); font: .92rem system-ui, sans-serif; }
+.tlist li span { flex: 1; }
+#chrono, #status { min-height: 140px; }
+.step.collapsed .verdict { display: none; }
+#out-check, #out-reply, #out-comment { min-height: 170px; }

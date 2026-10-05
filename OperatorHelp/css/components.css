@@ -1,0 +1,57 @@
+/* Общие компоненты: карточка шага, поля, details, кнопки, подсказки, сводка */
+.step {
+  background: var(--paper); border: 1px solid var(--line); border-radius: 10px;
+  padding: 24px 22px; margin-bottom: 20px;
+}
+.step[hidden] { display: none; }
+.step h2 { margin: 0 0 6px; font-size: 1.25rem; }
+.task { margin: 0 0 20px; font-weight: bold; }
+label { display: block; margin-bottom: 16px; font-family: system-ui, sans-serif; font-size: .92rem; color: var(--muted); }
+input[type=text], input[type=url], textarea {
+  display: block; width: 100%; margin-top: 5px; padding: 10px 12px;
+  font: 1rem system-ui, sans-serif; color: var(--ink); background: var(--bg);
+  border: 1px solid var(--line); border-radius: 6px;
+}
+textarea { min-height: 76px; resize: vertical; }
+input:focus, textarea:focus, button:focus-visible, summary:focus-visible, a:focus-visible {
+  outline: 3px solid var(--accent); outline-offset: 1px;
+}
+.invalid { border-color: #c0392b !important; }
+details { border: 1px solid var(--line); border-radius: 8px; padding: 0 14px; margin: 22px 0; font-family: system-ui, sans-serif; }
+summary { cursor: pointer; padding: 12px 0; font-weight: 600; font-size: .95rem; }
+details[open] summary { border-bottom: 1px solid var(--line); margin-bottom: 14px; }
+details .body { padding-bottom: 6px; }
+.prompt { background: var(--bg); border-left: 4px solid var(--accent); padding: 10px 12px; border-radius: 4px; color: var(--muted); font-size: .92rem; }
+a { color: var(--accent); }
+.next {
+  display: inline-block; padding: 12px 20px; border: 0; border-radius: 8px; cursor: pointer;
+  background: var(--accent); color: var(--accent-ink); font: 600 1rem system-ui, sans-serif;
+}
+.next:hover { filter: brightness(1.08); }
+.error { color: #c0392b; font: .9rem system-ui, sans-serif; margin: 0 0 12px; min-height: 1.2em; }
+.placeholder { color: var(--muted); font-family: system-ui, sans-serif; }
+.reset { background: none; border: 0; color: var(--muted); font: .85rem system-ui, sans-serif; cursor: pointer; text-decoration: underline; padding: 0; }
+.summary { color: var(--muted); font: .95rem/1.7 system-ui, sans-serif; margin: 8px 0 0; }
+.copy {
+  display: inline-block; max-width: 100%; white-space: pre-wrap; padding: 1px 6px; margin: 0; border: 1px dashed var(--line); border-radius: 5px;
+  background: var(--bg); color: var(--ink); font: inherit; text-align: left; cursor: pointer;
+}
+.copy:hover { border-color: var(--accent); }
+.linkbtn {
+  padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: default;
+}
+.how { margin: 0 0 12px; padding-left: 20px; font-size: .95rem; }
+.hint { color: var(--muted); font-size: .88rem; }
+.next.small { padding: 8px 14px; font-size: .92rem; }
+details.inner { margin: 8px 0; }
+pre { white-space: pre-wrap; max-height: 260px; overflow: auto; font: .82rem/1.45 system-ui, sans-serif; background: var(--bg); padding: 10px; border-radius: 6px; margin: 0 0 12px; }
+.sumcard { border: 1px solid var(--line); border-radius: 8px; padding: 10px 14px; margin: 12px 0 18px; background: var(--bg); }
+.sumtitle { font: 600 .85rem system-ui, sans-serif; color: var(--muted); }
+.srow { margin: 8px 0; font: .95rem/1.5 system-ui, sans-serif; }
+.slabel { display: block; font-size: .78rem; color: var(--muted); }
+.fieldlabel { font: .92rem system-ui, sans-serif; color: var(--muted); margin-bottom: 6px; }
+.x { border: 0; background: none; color: var(--muted); cursor: pointer; font-size: 1rem; }
+input[type=number], input[type=password] { display: block; width: 100%; margin-top: 5px; padding: 10px 12px; font: 1rem system-ui, sans-serif; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; }
+label.chk { display: flex; gap: 8px; align-items: flex-start; color: var(--ink); margin-bottom: 6px; }
+.verdict { white-space: pre-wrap; border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 6px; padding: 10px 12px; margin: 0 0 16px; font: .92rem/1.5 system-ui, sans-serif; }
+.outbox { margin-bottom: 14px; }

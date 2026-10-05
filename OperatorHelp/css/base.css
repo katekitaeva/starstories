@@ -1,0 +1,31 @@
+/* Переменные, тёмная тема, базовая типографика, полоса прогресса */
+:root {
+  --bg: #eef2f4;
+  --paper: #ffffff;
+  --ink: #1c2a33;
+  --muted: #5d6f7a;
+  --line: #cfd9de;
+  --accent: #0b6e8a;
+  --accent-ink: #ffffff;
+  --done: #2e7d5b;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #12191e; --paper: #1a242b; --ink: #e6eef2; --muted: #93a5af;
+    --line: #2c3a43; --accent: #4fb3d1; --accent-ink: #0b1a21; --done: #5fc298;
+  }
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font: 17px/1.55 Georgia, "Times New Roman", serif;
+}
+main { max-width: 680px; margin: 0 auto; padding: 32px 18px 80px; }
+h1 { font-size: 1.5rem; margin: 0 0 4px; }
+.lead { color: var(--muted); margin: 0 0 28px; font-family: system-ui, sans-serif; font-size: .95rem; }
+
+.progress { display: flex; gap: 6px; margin-bottom: 24px; }
+.progress span { flex: 1; height: 6px; border-radius: 3px; background: var(--line); }
+.progress span.on { background: var(--accent); }
+.progress span.done { background: var(--done); }
