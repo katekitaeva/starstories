@@ -4,8 +4,18 @@ import { $, copyText } from "../ui.js";
 import { save } from "../state.js";
 import { goTo } from "../nav.js";
 import { parseAnswer, NAMES } from "../parser.js";
+import { parseClientUrl, rememberOrigin } from "../crm.js";
 
 let promptText = "";
+
+export function updateClientUrlMsg() {
+  const msg = $("client-url-msg"), raw = $("client-url").value.trim();
+  if (!raw) { msg.textContent = ""; return; }
+  const ref = parseClientUrl(raw);
+  if (!ref) { msg.textContent = "Не похоже на адрес. Нужен адрес вида https://…/clients/…"; return; }
+  rememberOrigin(ref.origin);
+  msg.textContent = ref.clientId ? "Ссылки на тикет и заказ включены." : "Ссылка на тикет включена. В адресе нет /clients/…, поэтому ссылка на заказ не строится.";
+}
 
 export async function loadPrompt() {
   const st = $("prompt-state");
@@ -20,6 +30,8 @@ export async function loadPrompt() {
 }
 
 export function initStep1() {
+  $("client-url").addEventListener("input", updateClientUrlMsg);
+
   $("next-1").addEventListener("click", () => {
     const err = $("err-1");
     const required = ["ticket", "order", "demand"];

@@ -6,7 +6,7 @@ import { state, save, load } from "./state.js";
 import { $ } from "./ui.js";
 import { render, initNav } from "./nav.js";
 import { connSummary, initConnection } from "./github.js";
-import { initStep1, loadPrompt } from "./steps/step1.js";
+import { initStep1, loadPrompt, updateClientUrlMsg } from "./steps/step1.js";
 import { initStep2, renderThemes } from "./steps/step2.js";
 import { initStep3 } from "./steps/step3.js";
 import { initStep4, updPh } from "./steps/step4.js";
@@ -33,4 +33,4 @@ $("reset").addEventListener("click", () => {
 
 connSummary();
 loadPrompt();
-load(); renderThemes(); render(); updPh();
+load(); renderThemes(); render(); updPh(); updateClientUrlMsg();

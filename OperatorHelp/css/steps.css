@@ -19,3 +19,12 @@
 label.chk{display:flex;gap:9px;align-items:flex-start;font-weight:400;margin-bottom:8px}
 .outbox{margin-bottom:14px}
 #answer{min-height:150px}#contacts,#tasks{min-height:110px}#chrono,#status{min-height:140px}#out-check,#out-reply,#out-comment{min-height:170px}
+/* Шаги 2 и 3 (блок 2 протокола): ссылки на CRM, строка заказа у тем, числовые поля, источники критериев */
+.numlink{display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap}
+.numlink .copy{padding:0 6px}
+.orderline{margin:0 0 10px;font-size:14px}.orderline:empty{display:none}
+.tablinks{margin:0 0 14px;line-height:1.8}
+.src{font-weight:400;font-size:12px;color:var(--soft);margin-left:6px}
+.numgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.calc{margin:0 0 14px;font-size:13.5px;color:var(--ink)}
+@media (min-width:640px){label.row{display:grid;grid-template-columns:1fr 120px;align-items:center;gap:14px}label.row input{margin-top:0}}

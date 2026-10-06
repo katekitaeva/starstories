@@ -60,6 +60,10 @@
       <label>Номер заказа
         <input type="text" id="order" autocomplete="off">
       </label>
+      <label>Адрес карточки клиента в CRM (по нему строятся ссылки на тикет и заказ)
+        <input type="url" id="client-url" autocomplete="off" placeholder="https://…/clients/…">
+      </label>
+      <p class="hint msg" id="client-url-msg" role="status"></p>
       <label>Суть проблемы клиента
         <textarea id="problem"></textarea>
       </label>
@@ -114,6 +118,7 @@
         <textarea id="status"></textarea>
       </label>
       <div class="fieldlabel">Темы обращения</div>
+      <div class="orderline" id="theme-order"></div>
       <div class="themepick">
         <select id="t1" aria-label="Тип"></select>
         <select id="t2" aria-label="Подтип" hidden></select>
@@ -134,21 +139,26 @@
   <!-- ШАГ 3 -->
   <section class="step" id="step-3" hidden>
     <h2><button type="button" class="linkbtn" data-n="3">Шаг 3. Контекст клиента<span class="backicon"><svg class="i" aria-hidden="true" focusable="false"><use href="assets/icons.svg#i-back"/></svg></span></button></h2>
-    <p class="task">Заполните по карточке клиента в CRM (вкладки «Клиент», «Коммуникации», «Заказы», «Баланс»).</p>
+    <p class="task">Заполните по карточке клиента в CRM. Критерии взяты из инструкции <a id="memo-link" href="#" target="_blank" rel="noopener">«Памятка» (Loyalty team)</a>.</p>
+    <p class="hint tablinks" id="tablinks"></p>
     <div class="fields">
-      <div class="fieldlabel">Критичность ситуации</div>
+      <div class="fieldlabel">Критичность ситуации <span class="src">Памятка, блок «Оцените критичность ситуации»</span></div>
       <label class="chk"><input type="checkbox" id="k1"> обращение мамочки, человека с ограниченными возможностями или медийной личности</label>
       <label class="chk"><input type="checkbox" id="k2"> заказ для гуманитарной помощи или благотворительности</label>
-      <label class="chk"><input type="checkbox" id="k3"> дорогой заказ</label>
-      <div class="fieldlabel" style="margin-top:12px">Метки на клиенте</div>
+      <div class="fieldlabel" style="margin-top:12px">Метки на клиенте <span class="src">Памятка, блок критериев клиента</span></div>
       <label class="chk"><input type="checkbox" id="l1"> «фрод: злоупотребляет»</label>
       <label class="chk"><input type="checkbox" id="l2"> «хамит, ругается»</label>
       <label class="chk"><input type="checkbox" id="l3"> «бан купонов»</label>
       <label class="chk"><input type="checkbox" id="l4"> негативные комментарии других подразделений</label>
-      <label style="margin-top:12px">Начислений по претензиям за 2 месяца<input type="number" id="c-acc" min="0"></label>
-      <label>Доля возвратов от заказов, %<input type="number" id="c-ret" min="0" max="100"></label>
-      <label>Доля отменённых заказов, %<input type="number" id="c-can" min="0" max="100"></label>
-      <label>Стоимость заказа, ₽<input type="number" id="c-sum" min="0"></label>
+      <div class="fieldlabel" style="margin-top:12px">Показатели клиента <span class="src">Памятка, блок критериев клиента</span></div>
+      <label class="row">Начислений по претензиям за 2 месяца<input type="number" id="c-acc" min="0"></label>
+      <div class="numgrid">
+        <label>Заказов<input type="number" id="c-orders" min="0"></label>
+        <label>Отмен<input type="number" id="c-cancels" min="0"></label>
+        <label>Возвратов<input type="number" id="c-returns" min="0"></label>
+      </div>
+      <p class="calc" id="calc-shares"></p>
+      <label class="row">Стоимость заказа, ₽<input type="number" id="c-sum" min="0"></label>
       <label>Доходность и статус клиента (премиальный, медийный, плашка VIP), своими словами<input type="text" id="c-status" autocomplete="off"></label>
     </div>
     <div class="verdict" id="verdict"></div>

@@ -1,6 +1,7 @@
 // Шаг 2. Что произошло: сводка шага 1, хронология, статус, темы обращения (промт step002 + data/claim-types.json).
 
-import { $, val, copyText, copyBtn, deepseekLink } from "../ui.js";
+import { $, val, copyText, copyBtn, deepseekLink, linkOrCopy } from "../ui.js";
+import { ticketUrl, orderUrl } from "../crm.js";
 import { state, save } from "../state.js";
 import { goTo, onRender } from "../nav.js";
 import { parseAnswer, LABELS2 } from "../parser.js";
@@ -20,7 +21,11 @@ export function renderSummary() {
     const l = document.createElement("span"); l.className = "slabel"; l.textContent = label;
     r.append(l, node); box.appendChild(r);
   };
-  rows.forEach(([label, id]) => { const v = val(id); if (v) add(label, copyBtn(v)); });
+  rows.forEach(([label, id]) => {
+    const v = val(id);
+    if (!v) return;
+    add(label, id === "ticket" ? linkOrCopy(v, ticketUrl(v)) : id === "order" ? linkOrCopy(v, orderUrl(v)) : copyBtn(v));
+  });
   const link = val("chatlink");
   if (/^https?:\/\//i.test(link)) add("Чат DeepSeek", deepseekLink(link));
   const slot = $("chat-link-slot");
@@ -31,6 +36,15 @@ export function renderSummary() {
     a.href = link; a.target = "_blank"; a.rel = "noopener"; a.textContent = phrase;
     slot.appendChild(a);
   } else slot.textContent = phrase;
+  renderThemeOrder();
+}
+
+/* Номер заказа рядом с темами: оператор переносит в тикет и то и другое */
+function renderThemeOrder() {
+  const slot = $("theme-order"), o = val("order");
+  slot.textContent = "";
+  if (!o) return;
+  slot.append("Заказ для тикета: ", linkOrCopy(o, orderUrl(o)));
 }
 
 /* ---------- Справочник тем (3 уровня) ---------- */

@@ -51,3 +51,20 @@ export function deepseekLink(url) {
   a.append(img, "Чат DeepSeek");
   return a;
 }
+
+/** Номер как ссылка плюс отдельная кнопка копирования. Без адреса остаётся обычная копируемая кнопка. */
+export function linkOrCopy(text, href) {
+  if (!href) return copyBtn(text);
+  const wrap = document.createElement("span");
+  wrap.className = "numlink";
+  const a = document.createElement("a");
+  a.href = href; a.target = "_blank"; a.rel = "noopener"; a.textContent = text;
+  const b = document.createElement("button");
+  b.type = "button"; b.className = "copy"; b.title = "Скопировать"; b.setAttribute("aria-label", "Скопировать " + text);
+  const icon = document.createElement("span");
+  icon.textContent = " 📋";
+  b.append(icon);
+  b.addEventListener("click", () => copyText(text, icon));
+  wrap.append(a, b);
+  return wrap;
+}
