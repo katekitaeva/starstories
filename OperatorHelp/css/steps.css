@@ -1,19 +1,21 @@
-/* Состояние «свёрнутый шаг» и стили конкретных шагов */
-.step.collapsed .fields, .step.collapsed details, .step.collapsed .actions { display: none; }
-.step.collapsed { padding: 14px 22px; }
-.step.collapsed h2 { font-size: 1rem; color: var(--done); margin: 0; }
-.step.collapsed .task { display: none; }
-.backicon { display: none; }
-.step.collapsed .linkbtn { color: var(--accent); cursor: pointer; text-decoration: underline; }
-.step.collapsed .backicon { display: inline; }
-#answer { min-height: 150px; }
-#contacts, #tasks { min-height: 110px; }
-.step.collapsed .sumcard, .step.collapsed .msg { display: none; }
-.themepick { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
-.themepick select, .themepick input, .tlist select { font: .92rem system-ui, sans-serif; padding: 8px; background: var(--bg); color: var(--ink); border: 1px solid var(--line); border-radius: 6px; max-width: 100%; }
-.tlist { list-style: none; padding: 0; margin: 8px 0 16px; }
-.tlist li { display: flex; gap: 8px; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--line); font: .92rem system-ui, sans-serif; }
-.tlist li span { flex: 1; }
-#chrono, #status { min-height: 140px; }
-.step.collapsed .verdict { display: none; }
-#out-check, #out-reply, #out-comment { min-height: 170px; }
+/* Прогресс, карточки шагов, свёрнутое состояние, выбор тем, чекбоксы, высоты полей */
+/* прогресс и шаги */
+.progress{display:flex;gap:6px;margin:6px 0 20px}.progress span{flex:1;height:6px;border-radius:3px;background:var(--line)}.progress span.on{background:var(--ac)}.progress span.done{background:var(--good)}
+.step{background:var(--card);border-radius:14px;box-shadow:var(--sh);border:1px solid var(--line);padding:24px;margin:0 0 20px}
+.step[hidden]{display:none}
+.step h2{margin:0 0 6px;font-size:19px;font-weight:700}
+.task{margin:0 0 18px;font-weight:600;color:var(--soft)}
+.linkbtn{padding:0;border:0;background:none;color:inherit;font:inherit;text-align:left;cursor:default}
+.backicon{display:none}.backicon .i{width:16px;height:16px;vertical-align:-2px}
+.step.collapsed .linkbtn{color:var(--good);cursor:pointer}.step.collapsed .linkbtn:hover{text-decoration:underline}
+.step.collapsed .backicon{display:inline;margin-left:4px}
+.step.collapsed .fields,.step.collapsed details,.step.collapsed .actions{display:none}
+.step.collapsed{padding:14px 22px}.step.collapsed h2{font-size:15.5px;color:var(--good);margin:0}.step.collapsed .task{display:none}
+.step.collapsed .sumcard,.step.collapsed .msg,.step.collapsed .verdict{display:none}
+.themepick{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}.themepick select,.themepick input{margin-top:0}
+.tlist{list-style:none;padding:0;margin:8px 0 16px}
+.tlist li{display:flex;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid var(--line);font-size:14px}.tlist li span{flex:1}.tlist select{margin-top:0}
+.x{border:0;background:none;color:var(--soft);cursor:pointer;font-size:1rem}.x:hover{color:var(--er)}
+label.chk{display:flex;gap:9px;align-items:flex-start;font-weight:400;margin-bottom:8px}
+.outbox{margin-bottom:14px}
+#answer{min-height:150px}#contacts,#tasks{min-height:110px}#chrono,#status{min-height:140px}#out-check,#out-reply,#out-comment{min-height:170px}

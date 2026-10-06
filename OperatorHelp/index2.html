@@ -4,42 +4,43 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Проводник по претензии</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpolygon points='50,6 91,29 50,52 9,29' fill='%237ee0e8'/%3E%3Cpolygon points='9,29 50,52 50,95 9,72' fill='%2310a3b2'/%3E%3Cpolygon points='91,29 50,52 50,95 91,72' fill='%230a7482'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/hero.css">
 <link rel="stylesheet" href="css/components.css">
 <link rel="stylesheet" href="css/steps.css">
 </head>
 <body>
-<main>
-  <h1>Проводник по претензии</h1>
-  <p class="lead">Один алгоритм каждый раз. Идём по шагам, не перескакивая вперёд.</p>
-  <details class="conn" id="conn"><summary id="conn-sum">Подключение к operator-data: не настроено</summary>
-    <div class="body">
-      <label>Владелец (логин GitHub)<input type="text" id="c-owner" autocomplete="off"></label>
-      <label>Репозиторий<input type="text" id="c-repo" value="operator-data" autocomplete="off"></label>
-      <label>Ветка<input type="text" id="c-branch" value="main" autocomplete="off"></label>
-      <label>Токен (Fine-grained, Contents: Read)<input type="password" id="c-token" autocomplete="off"></label>
-      <button class="next small" id="c-save" type="button">Сохранить и проверить</button>
-      <button class="reset" id="c-forget" type="button">Забыть токен</button>
-      <p class="hint" id="c-msg" role="status"></p>
+<header class="hero"><div class="hero-top"><span class="sync-badge off" id="conn-sum">не подключено</span><button class="settings-btn" id="settingsBtn" type="button" title="Настройки подключения" aria-label="Настройки подключения">⚙</button></div><nav class="roles" aria-label="Роли"><a class="role side" href="librarian.html" title="Библиотекарь: кэш документации"><svg class="rico" aria-hidden="true" focusable="false"><use href="assets/icons.svg#ic-librarian"/></svg><span class="rname">Библиотекарь</span></a><div class="role main" aria-current="page"><svg class="rico" aria-hidden="true" focusable="false"><use href="assets/icons.svg#ic-guide"/></svg><h1>Проводник по претензии</h1><p>Один алгоритм каждый раз. Идём по шагам, не перескакивая вперёд.</p></div><a class="role side" href="memuarist.html" title="История кейсов и статистика"><svg class="rico" aria-hidden="true" focusable="false"><use href="assets/icons.svg#ic-historian"/></svg><span class="rname">Историк</span></a></nav></header>
+<main class="app">
+  <div class="settings-panel" id="conn"><h3>Подключение к GitHub</h3>
+    <p>Токен хранится только в этом браузере (localStorage) и никогда не попадает в код страницы или в репозиторий. На новом устройстве введите его заново. Нужен fine-grained personal access token с правом Contents: Read только для репозитория с данными.</p>
+    <div class="settings-grid">
+      <div><label for="c-owner">Владелец (логин GitHub)</label><input type="text" id="c-owner" autocomplete="off" placeholder="katekitaeva"></div>
+      <div><label for="c-repo">Репозиторий</label><input type="text" id="c-repo" value="operator-data" autocomplete="off"></div>
+      <div><label for="c-branch">Ветка</label><input type="text" id="c-branch" value="main" autocomplete="off"></div><div></div>
+      <div class="settings-full"><label for="c-token">Токен (Fine-grained, Contents: Read)</label><input type="password" id="c-token" autocomplete="off" placeholder="github_pat_..."></div>
     </div>
-  </details>
+    <div class="btns" style="margin-top:0"><button class="next small pri" id="c-save" type="button"><svg class="i" aria-hidden="true" focusable="false"><use href="assets/icons.svg#i-plug"/></svg>Сохранить и проверить</button><button class="next small" id="c-forget" type="button"><svg class="i" aria-hidden="true" focusable="false"><use href="assets/icons.svg#i-trash"/></svg>Забыть токен</button></div>
+    <p class="hint msg" id="c-msg" role="status"></p>
+  </div>
 
   <div class="progress" id="progress" aria-hidden="true"></div>
 
   <!-- ШАГ 1 -->
   <section class="step" id="step-1">
-    <h2><button type="button" class="linkbtn" data-n="1">Шаг 1. Прочитать претензию<span class="backicon"> 🔙</span></button></h2>
+    <h2><button type="button" class="linkbtn" data-n="1">Шаг 1. Прочитать претензию<span class="backicon"><svg class="i" aria-hidden="true" focusable="false"><use href="assets/icons.svg#i-back"/></svg></span></button></h2>
     <p class="task">Прочитайте претензию и заполните поля ниже.</p>
 
-    <details id="helper" open>
-      <summary>Помощник DeepSeek: разобрать чат с клиентом</summary>
+    <details class="helper" id="helper" open>
+      <summary><svg class="ds" aria-hidden="true" focusable="false"><use href="assets/icons.svg#ic-deepseek"/></svg><span>Помощник DeepSeek: разобрать чат с клиентом</span></summary>
       <div class="body">
         <ol class="how">
           <li><a href="https://chat.deepseek.com/" target="_blank" rel="noopener">Откройте новый чат DeepSeek</a> и вставьте промт (кнопка ниже).</li>
           <li>Когда DeepSeek ответит «Жду», вставьте текст чата с клиентом.</li>
           <li>Вставьте ответ DeepSeek сюда и нажмите «Разобрать».</li>
         </ol>
-        <p><button class="next small" id="copy-prompt" type="button">📋 Скопировать промт step001</button> <span class="hint" id="prompt-state" role="status"></span></p>
+        <p><button class="next small" id="copy-prompt" type="button"><svg class="i" aria-hidden="true" focusable="false"><use href="assets/icons.svg#i-clip"/></svg>Скопировать промт step001</button> <span class="hint" id="prompt-state" role="status"></span></p>
         <details class="inner"><summary>Показать текст промта</summary><pre id="prompt-text"></pre></details>
         <label style="margin-top:14px">Ссылка на этот чат DeepSeek (чтобы вернуться к нему на следующих шагах)
           <input type="url" id="chatlink" placeholder="https://chat.deepseek.com/...">
@@ -47,7 +48,7 @@
         <label>Ответ DeepSeek
           <textarea id="answer" placeholder="ЗАКАЗ: ...&#10;ПРОБЛЕМА: ...&#10;ТРЕБОВАНИЕ: ..."></textarea>
         </label>
-        <button class="next" id="parse" type="button">Разобрать ответ и заполнить поля</button>
+        <button class="next" id="parse" type="button"><svg class="i" aria-hidden="true" focusable="false"><use href="assets/icons.svg#i-spark"/></svg>Разобрать ответ и заполнить поля</button>
       </div>
     </details>
     <p class="hint msg" id="parse-msg" role="status"></p>
@@ -81,26 +82,26 @@
 
     <div class="actions">
       <p class="error" id="err-1" role="alert"></p>
-      <button class="next" id="next-1" type="button">Далее к блоку «Что произошло»</button>
+      <button class="next" id="next-1" type="button">Далее к блоку «Что произошло»<svg class="i" aria-hidden="true" focusable="false"><use href="assets/icons.svg#i-next"/></svg></button>
     </div>
   </section>
 
   <!-- ШАГ 2 -->
   <section class="step" id="step-2" hidden>
-    <h2><button type="button" class="linkbtn" data-n="2">Шаг 2. Что произошло<span class="backicon"> 🔙</span></button></h2>
+    <h2><button type="button" class="linkbtn" data-n="2">Шаг 2. Что произошло<span class="backicon"><svg class="i" aria-hidden="true" focusable="false"><use href="assets/icons.svg#i-back"/></svg></span></button></h2>
     <div class="sumcard"><div class="sumtitle">Сводка шага 1 (нажмите на значение, чтобы скопировать)</div><div id="sum-card"></div></div>
     <p class="task">Восстановите ход событий и определите темы обращения.</p>
 
-    <details id="helper2" open>
-      <summary>Помощник DeepSeek: хронология, статус, темы</summary>
+    <details class="helper" id="helper2" open>
+      <summary><svg class="ds" aria-hidden="true" focusable="false"><use href="assets/icons.svg#ic-deepseek"/></svg><span>Помощник DeepSeek: хронология, статус, темы</span></summary>
       <div class="body">
         <p class="hint">Вставьте промт <span id="chat-link-slot">в тот же чат DeepSeek, где вы разбирали претензию</span>. Текст чата заново вставлять не нужно. DeepSeek сначала спросит, проставлены ли в тикете уже какие-то темы: ответьте ему, перечислив их, или напишите «нет».</p>
-        <p><button class="next small" id="copy-prompt2" type="button">📋 Скопировать промт step002</button> <span class="hint" id="prompt2-state" role="status"></span></p>
+        <p><button class="next small" id="copy-prompt2" type="button"><svg class="i" aria-hidden="true" focusable="false"><use href="assets/icons.svg#i-clip"/></svg>Скопировать промт step002</button> <span class="hint" id="prompt2-state" role="status"></span></p>
         <details class="inner"><summary>Показать текст промта</summary><pre id="prompt2-text"></pre></details>
         <label style="margin-top:14px">Ответ DeepSeek
           <textarea id="answer2" placeholder="ХРОНОЛОГИЯ:&#10;СТАТУС:&#10;ТЕМЫ:"></textarea>
         </label>
-        <button class="next" id="parse2" type="button">Разобрать ответ и заполнить поля</button>
+        <button class="next" id="parse2" type="button"><svg class="i" aria-hidden="true" focusable="false"><use href="assets/icons.svg#i-spark"/></svg>Разобрать ответ и заполнить поля</button>
       </div>
     </details>
     <p class="hint msg" id="parse2-msg" role="status"></p>
@@ -118,7 +119,7 @@
         <select id="t2" aria-label="Подтип" hidden></select>
         <select id="t3" aria-label="Уточнение" hidden></select>
         <input type="text" id="theme-manual" placeholder="или впишите тему вручную">
-        <button class="next small" id="add-theme" type="button">Добавить тему</button>
+        <button class="next small" id="add-theme" type="button"><svg class="i" aria-hidden="true" focusable="false"><use href="assets/icons.svg#i-plus"/></svg>Добавить тему</button>
       </div>
       <p class="hint" id="theme-hint"></p>
       <ul class="tlist" id="theme-list"></ul>
@@ -126,13 +127,13 @@
 
     <div class="actions">
       <p class="error" id="err-2" role="alert"></p>
-      <button class="next" id="next-2" type="button">Далее к блоку «Контекст клиента»</button>
+      <button class="next" id="next-2" type="button">Далее к блоку «Контекст клиента»<svg class="i" aria-hidden="true" focusable="false"><use href="assets/icons.svg#i-next"/></svg></button>
     </div>
   </section>
 
   <!-- ШАГ 3 -->
   <section class="step" id="step-3" hidden>
-    <h2><button type="button" class="linkbtn" data-n="3">Шаг 3. Контекст клиента<span class="backicon"> 🔙</span></button></h2>
+    <h2><button type="button" class="linkbtn" data-n="3">Шаг 3. Контекст клиента<span class="backicon"><svg class="i" aria-hidden="true" focusable="false"><use href="assets/icons.svg#i-back"/></svg></span></button></h2>
     <p class="task">Заполните по карточке клиента в CRM (вкладки «Клиент», «Коммуникации», «Заказы», «Баланс»).</p>
     <div class="fields">
       <div class="fieldlabel">Критичность ситуации</div>
@@ -151,15 +152,15 @@
       <label>Доходность и статус клиента (премиальный, медийный, плашка VIP), своими словами<input type="text" id="c-status" autocomplete="off"></label>
     </div>
     <div class="verdict" id="verdict"></div>
-    <div class="actions"><button class="next" id="next-3" type="button">Далее к блоку «Решение и тексты»</button></div>
+    <div class="actions"><button class="next" id="next-3" type="button">Далее к блоку «Решение и тексты»<svg class="i" aria-hidden="true" focusable="false"><use href="assets/icons.svg#i-next"/></svg></button></div>
   </section>
 
   <!-- ШАГ 4 -->
   <section class="step" id="step-4" hidden>
-    <h2><button type="button" class="linkbtn" data-n="4">Шаг 4. Решение и тексты<span class="backicon"> 🔙</span></button></h2>
+    <h2><button type="button" class="linkbtn" data-n="4">Шаг 4. Решение и тексты<span class="backicon"><svg class="i" aria-hidden="true" focusable="false"><use href="assets/icons.svg#i-back"/></svg></span></button></h2>
     <p class="task">DeepSeek предложит варианты по инструкциям Loyalty, вы выберете, и он напишет чеклист, ответ клиенту и комментарий.</p>
-    <details id="helper4" open>
-      <summary>Помощник DeepSeek</summary>
+    <details class="helper" id="helper4" open>
+      <summary><svg class="ds" aria-hidden="true" focusable="false"><use href="assets/icons.svg#ic-deepseek"/></svg><span>Помощник DeepSeek</span></summary>
       <div class="body">
         <ol class="how">
           <li>Вставьте промт в тот же чат DeepSeek: он выдаст варианты и спросит ваш выбор.</li>
@@ -168,24 +169,24 @@
         </ol>
         <div class="fieldlabel">Страницы инструкций в промте</div>
         <div id="pages-list"></div>
-        <p><button class="next small" id="build-prompt" type="button">📋 Собрать и скопировать промт</button> <span class="hint" id="prompt4-state" role="status"></span></p>
+        <p><button class="next small" id="build-prompt" type="button"><svg class="i" aria-hidden="true" focusable="false"><use href="assets/icons.svg#i-clip"/></svg>Собрать и скопировать промт</button> <span class="hint" id="prompt4-state" role="status"></span></p>
         <details class="inner"><summary>Показать промт</summary><pre id="prompt4-text"></pre></details>
         <label style="margin-top:14px">Итоговый ответ DeepSeek
           <textarea id="answer4" placeholder="ЧЕКЛИСТ:&#10;СООБЩЕНИЕ:&#10;КОММЕНТАРИЙ:"></textarea>
         </label>
-        <button class="next" id="parse4" type="button">Разобрать ответ</button>
+        <button class="next" id="parse4" type="button"><svg class="i" aria-hidden="true" focusable="false"><use href="assets/icons.svg#i-spark"/></svg>Разобрать ответ</button>
       </div>
     </details>
     <p class="hint msg" id="parse4-msg" role="status"></p>
     <div class="fields">
-      <div class="outbox"><label>Чеклист<textarea id="out-check"></textarea></label><button class="next small cp" data-for="out-check" type="button">📋 Копировать</button></div>
-      <div class="outbox"><label>Ответ клиенту в чате<textarea id="out-reply"></textarea></label><button class="next small cp" data-for="out-reply" type="button">📋 Копировать</button></div>
-      <div class="outbox"><label>Комментарий в тикете<textarea id="out-comment"></textarea></label><button class="next small cp" data-for="out-comment" type="button">📋 Копировать</button></div>
+      <div class="outbox"><label>Чеклист<textarea id="out-check"></textarea></label><button class="next small cp" data-for="out-check" type="button"><svg class="i" aria-hidden="true" focusable="false"><use href="assets/icons.svg#i-copy"/></svg><span>Копировать</span></button></div>
+      <div class="outbox"><label>Ответ клиенту в чате<textarea id="out-reply"></textarea></label><button class="next small cp" data-for="out-reply" type="button"><svg class="i" aria-hidden="true" focusable="false"><use href="assets/icons.svg#i-copy"/></svg><span>Копировать</span></button></div>
+      <div class="outbox"><label>Комментарий в тикете<textarea id="out-comment"></textarea></label><button class="next small cp" data-for="out-comment" type="button"><svg class="i" aria-hidden="true" focusable="false"><use href="assets/icons.svg#i-copy"/></svg><span>Копировать</span></button></div>
       <p class="hint" id="ph-note"></p>
     </div>
   </section>
 
-  <p><button class="reset" id="reset" type="button">Начать новую претензию</button></p>
+  <p><button class="reset" id="reset" type="button"><svg class="i" aria-hidden="true" focusable="false"><use href="assets/icons.svg#i-reset"/></svg>Начать новую претензию</button></p>
 </main>
 
 <script type="module" src="js/main.js"></script>

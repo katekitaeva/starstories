@@ -65,7 +65,8 @@ export function initStep4() {
 
   document.querySelectorAll(".cp").forEach(b => b.addEventListener("click", async () => {
     const ok = await copyText($(b.dataset.for).value);
-    b.textContent = ok ? "✅ Скопировано" : "⚠️ Не удалось";
-    setTimeout(() => { b.textContent = "📋 Копировать"; }, 1500);
+    const lb = b.querySelector("span");   // в кнопке есть иконка, меняем только подпись
+    lb.textContent = ok ? "✅ Скопировано" : "⚠️ Не удалось";
+    setTimeout(() => { lb.textContent = "Копировать"; }, 1500);
   }));
 }

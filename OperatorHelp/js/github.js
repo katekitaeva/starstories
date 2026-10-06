@@ -17,11 +17,15 @@ export async function ghGet(path) {
 
 export function connSummary() {
   const c = conn();
-  $("conn-sum").textContent = c && c.token ? "Подключение: " + c.owner + "/" + c.repo + " (" + (c.branch || "main") + ")" : "Подключение к operator-data: не настроено";
+  const bd = $("conn-sum"), on = !!(c && c.token);
+  bd.textContent = on ? "подключено: " + c.owner + "/" + c.repo + " (" + (c.branch || "main") + ")" : "не подключено";
+  bd.className = "sync-badge " + (on ? "ok" : "off");
   if (c) { $("c-owner").value = c.owner || ""; $("c-repo").value = c.repo || "operator-data"; $("c-branch").value = c.branch || "main"; }
 }
 
 export function initConnection() {
+  // шестерёнка в шапке открывает и закрывает панель настроек
+  $("settingsBtn").addEventListener("click", () => $("conn").classList.toggle("open"));
   $("c-save").addEventListener("click", async () => {
     const c = { owner: val("c-owner"), repo: val("c-repo") || "operator-data", branch: val("c-branch") || "main", token: $("c-token").value.trim() };
     const msg = $("c-msg");
@@ -31,7 +35,7 @@ export function initConnection() {
     try {
       const m = JSON.parse(await ghGet("cache/manifest.json"));
       msg.textContent = "Подключено. Страниц в кэше: " + Object.keys(m.pages).length;
-      $("conn").open = false;
+      $("conn").classList.remove("open");
     } catch (e) { msg.textContent = "Не удалось прочитать cache/manifest.json (" + e.message + "). Проверьте логин, репозиторий и права токена."; }
     connSummary();
   });
