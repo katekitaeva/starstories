@@ -12,6 +12,10 @@ export const FIELDS = ["ticket", "order", "problem", "demand", "changed", "legal
 // Чекбоксы (checked), которые сохраняются так же
 export const CHECKS = ["k1", "k2", "l1", "l2", "l3", "l4"];
 
+// Справочник тем обращений лежит в приватном operator-data и читается по токену (собирает tools/build_claim_types.py)
+export const THEMES_PATH = "derived/claim-types.json";
+export const THEME_RULES_PATH = "derived/theme-rules.md";
+
 // Инструкция «Памятка» (Loyalty team): основание критериев шага 3
 export const MEMO_URL = "https://customer-support-help.o3t.ru/instrukcii-vydelennyh-grupp/instrukciya-dlya-vydelennoi-gruppy-loyalty-team/problemy-i-resheniya/pamyatka";
 

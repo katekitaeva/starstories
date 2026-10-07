@@ -38,9 +38,11 @@ export function initConnection() {
       $("conn").classList.remove("open");
     } catch (e) { msg.textContent = "Не удалось прочитать cache/manifest.json (" + e.message + "). Проверьте логин, репозиторий и права токена."; }
     connSummary();
+    document.dispatchEvent(new CustomEvent("operator:changed"));
   });
   $("c-forget").addEventListener("click", () => {
     try { localStorage.removeItem(CONN_KEY); } catch (e) {}
     connSummary(); $("c-msg").textContent = "Токен удалён из браузера.";
+    document.dispatchEvent(new CustomEvent("operator:changed"));
   });
 }
