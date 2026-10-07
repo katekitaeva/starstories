@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <title>Тренажёр STAR</title>
+<meta name="description" content="Интерактивный тренажёр для отработки кейсов по методологии STAR с привязкой к GitHub.">
+<meta property="og:title" content="Тренажёр STAR">
+<meta property="og:description" content="Интерактивный тренажёр для отработки кейсов по методологии STAR с привязкой к GitHub.">
 <style>
   html{-webkit-text-size-adjust:100%;text-size-adjust:100%;}
   :root{
@@ -361,6 +364,10 @@ async function loadAll(){
       document.getElementById('saveManualBtn').disabled = false;
     }catch(e){
       console.error(e);
+      try {
+        const localRes = await fetch('./data.json');
+        if(localRes.ok) CASES = await localRes.json();
+      } catch {}
       setSyncBadge(false, 'ошибка подключения — открой ⚙');
     }
   } else if(cfg.owner && cfg.repo){
@@ -369,10 +376,25 @@ async function loadAll(){
       CASES = await fetchCasesViaRaw();
       setSyncBadge(false, 'только чтение — добавь токен в ⚙ для сохранения');
     }catch(e){
-      console.error(e);
-      setSyncBadge(false, 'не удалось прочитать data.json');
+      console.warn('Raw fetch failed, trying local data.json:', e);
+      try {
+        const localRes = await fetch('./data.json');
+        if(localRes.ok) {
+          CASES = await localRes.json();
+          setSyncBadge(false, 'локальный режим — добавь токен в ⚙ для сохранения');
+        } else {
+          throw new Error('local fetch failed: ' + localRes.status);
+        }
+      } catch (err2) {
+        console.error(err2);
+        setSyncBadge(false, 'не удалось прочитать data.json');
+      }
     }
   } else {
+    try {
+      const localRes = await fetch('./data.json');
+      if(localRes.ok) CASES = await localRes.json();
+    } catch {}
     setSyncBadge(false, 'не подключено — открой ⚙');
   }
 }

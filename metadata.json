@@ -1,0 +1,8 @@
+{
+  "name": "Тренажёр STAR",
+  "description": "Интерактивный тренажёр для отработки кейсов по методологии STAR с привязкой к GitHub.",
+  "permissions": [],
+  "capabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
