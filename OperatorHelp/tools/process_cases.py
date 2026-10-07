@@ -43,6 +43,18 @@ def sanitize_card(card):
                 t["note"] = sanitize_text(t["note"])
     return card
 
+def extract_theme_paths(raw_themes):
+    paths = []
+    if isinstance(raw_themes, list):
+        for t in raw_themes:
+            if isinstance(t, str) and t.strip():
+                paths.append(t.strip())
+            elif isinstance(t, dict):
+                p = t.get("path") or t.get("name") or t.get("code") or ""
+                if p.strip():
+                    paths.append(p.strip())
+    return paths
+
 def main():
     os.makedirs(CASES_DIR, exist_ok=True)
     os.makedirs(INBOX_DIR, exist_ok=True)
@@ -82,20 +94,57 @@ def main():
         try:
             with open(cpath, "r", encoding="utf-8") as f:
                 c = json.load(f)
+            
+            theme_paths = extract_theme_paths(c.get("themes"))
+            
+            # Название кейса: если не задано в c.title, генерируем информативное имя
+            title = (c.get("title") or "").strip()
+            if not title:
+                if c.get("ticket"):
+                    title = f"Тикет #{c.get('ticket')}" + (f" ({theme_paths[0]})" if theme_paths else "")
+                elif c.get("order"):
+                    title = f"Заказ {c.get('order')}"
+                else:
+                    title = fname.replace(".json", "")
+
+            problem = (c.get("problem") or "").strip()
+            verdict = (c.get("verdict") or "").strip()
+            what_worked = (c.get("whatWorked") or "").strip()
+
+            digest_obj = {
+                "themes": theme_paths,
+                "problem": problem,
+                "verdict": verdict,
+                "whatWorked": what_worked
+            }
+
+            digest_text_parts = []
+            if theme_paths:
+                digest_text_parts.append(f"Темы: {', '.join(theme_paths)}")
+            if problem:
+                digest_text_parts.append(f"Суть проблемы: {problem}")
+            if verdict:
+                digest_text_parts.append(f"Вердикт: {verdict}")
+            if what_worked:
+                digest_text_parts.append(f"Что сработало: {what_worked}")
+            digest_text = " | ".join(digest_text_parts)
+
             manifest_cases.append({
                 "id": c.get("id") or fname.replace(".json", ""),
                 "file": fname,
-                "title": c.get("title") or "",
+                "title": title,
                 "date": c.get("date") or "",
                 "ticket": c.get("ticket") or "",
                 "order": c.get("order") or "",
                 "clientId": c.get("clientId") or None,
-                "themes": c.get("themes") or [],
-                "problem": c.get("problem") or "",
-                "demand": c.get("demand") or "",
-                "whatWorked": c.get("whatWorked") or "",
-                "qcComments": c.get("qcComments") or "",
-                "verdict": c.get("verdict") or "",
+                "themes": theme_paths if theme_paths else (c.get("themes") or []),
+                "problem": problem,
+                "demand": (c.get("demand") or "").strip(),
+                "whatWorked": what_worked,
+                "qcComments": (c.get("qcComments") or "").strip(),
+                "verdict": verdict,
+                "digest": digest_obj,
+                "digestText": digest_text,
                 "themesVersion": c.get("themesVersion") or None
             })
         except Exception as e:

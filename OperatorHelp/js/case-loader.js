@@ -48,8 +48,10 @@ export function initCaseLoader() {
         c.ticket || "",
         c.order || "",
         c.title || "",
-        c.problem || "",
-        ...(c.themes || []).map(t => typeof t === "string" ? t : (t.path || ""))
+        c.problem || (c.digest && c.digest.problem) || "",
+        c.verdict || (c.digest && c.digest.verdict) || "",
+        c.whatWorked || (c.digest && c.digest.whatWorked) || "",
+        ...(c.themes || (c.digest && c.digest.themes) || []).map(t => typeof t === "string" ? t : (t.path || t.name || ""))
       ].join(" ").toLowerCase();
       return hay.includes(q);
     });
@@ -63,17 +65,54 @@ export function initCaseLoader() {
     filtered.forEach(c => {
       const li = document.createElement("li");
       li.className = "modal-item";
-      const title = c.title ? `«${c.title}»` : (c.ticket ? "Тикет #" + c.ticket : (c.order ? "Заказ " + c.order : "Кейс"));
-      const date = c.date || "—";
-      const problem = (c.problem || "").slice(0, 80) + (c.problem && c.problem.length > 80 ? "…" : "");
+      li.style.cssText = "padding:10px 14px;cursor:pointer;";
 
-      li.innerHTML = `
-        <div class="modal-item-top">
-          <span>${title}</span>
-          <span class="hint" style="font-size:11px;">${date}</span>
-        </div>
-        <div class="modal-item-sub">${problem || "Без описания проблемы"}</div>
-      `;
+      // Формируем понятное название кейса (заголовок, либо тикет, либо заказ, либо имя файла)
+      let caseName = (c.title || "").trim();
+      if (!caseName) {
+        if (c.ticket) caseName = `Тикет #${c.ticket}`;
+        else if (c.order) caseName = `Заказ ${c.order}`;
+        else if (c.file) caseName = c.file.replace(/\.json$/i, "");
+        else caseName = "Кейс без названия";
+      }
+
+      const topRow = document.createElement("div");
+      topRow.className = "modal-item-top";
+      topRow.style.cssText = "display:flex;align-items:center;justify-content:space-between;gap:12px;";
+
+      const nameSpan = document.createElement("span");
+      nameSpan.style.cssText = "font-weight:600;font-size:14px;color:var(--ink);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;";
+      nameSpan.textContent = caseName;
+      nameSpan.title = caseName;
+      topRow.appendChild(nameSpan);
+
+      const metaBox = document.createElement("div");
+      metaBox.style.cssText = "display:flex;align-items:center;gap:8px;flex-shrink:0;";
+
+      if (c.title && c.ticket) {
+        const ticketBadge = document.createElement("span");
+        ticketBadge.className = "tag";
+        ticketBadge.style.cssText = "font-weight:600;color:var(--ink);padding:2px 7px;border-radius:4px;background:var(--card);border:1px solid var(--line);font-size:12px;";
+        ticketBadge.textContent = `#${c.ticket}`;
+        metaBox.appendChild(ticketBadge);
+      } else if (c.title && c.order) {
+        const orderBadge = document.createElement("span");
+        orderBadge.className = "tag";
+        orderBadge.style.cssText = "font-weight:600;color:var(--ink);padding:2px 7px;border-radius:4px;background:var(--card);border:1px solid var(--line);font-size:12px;";
+        orderBadge.textContent = `заказ ${c.order}`;
+        metaBox.appendChild(orderBadge);
+      }
+
+      if (c.date) {
+        const dateSpan = document.createElement("span");
+        dateSpan.className = "hint";
+        dateSpan.style.cssText = "font-size:12px;color:var(--soft);";
+        dateSpan.textContent = c.date;
+        metaBox.appendChild(dateSpan);
+      }
+
+      topRow.appendChild(metaBox);
+      li.appendChild(topRow);
 
       li.addEventListener("click", async () => {
         closeModal();

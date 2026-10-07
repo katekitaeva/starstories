@@ -11,7 +11,7 @@
 <link rel="stylesheet" href="css/steps.css">
 </head>
 <body>
-<header class="hero"><div class="hero-top"><span class="sync-badge off" id="conn-sum">не подключено</span><button class="settings-btn" id="settingsBtn" type="button" title="Настройки подключения" aria-label="Настройки подключения">⚙</button></div><nav class="roles" aria-label="Роли"><a class="role side" href="librarian.html" title="Библиотекарь: кэш документации"><svg class="rico" aria-hidden="true" focusable="false"><use href="assets/icons.svg#ic-librarian"/></svg><span class="rname">Библиотекарь</span></a><div class="role main" aria-current="page"><svg class="rico" aria-hidden="true" focusable="false"><use href="assets/icons.svg#ic-guide"/></svg><h1>Проводник по претензии</h1><p>Один алгоритм каждый раз. Идём по шагам, не перескакивая вперёд.</p></div><a class="role side" href="memuarist.html" title="История кейсов и статистика"><svg class="rico" aria-hidden="true" focusable="false"><use href="assets/icons.svg#ic-historian"/></svg><span class="rname">Историк</span></a></nav></header>
+<header class="hero"><div class="hero-top"><span class="sync-badge off" id="conn-sum">не подключено</span><button class="settings-btn" id="settingsBtn" type="button" title="Настройки подключения" aria-label="Настройки подключения">⚙</button></div><nav class="roles" aria-label="Роли"><a class="role side" href="librarian.html" title="Библиотекарь: кэш документации"><svg class="rico" aria-hidden="true" focusable="false"><use href="assets/icons.svg#ic-librarian"/></svg><span class="rname">Библиотекарь</span></a><div class="role main" aria-current="page"><svg class="rico" aria-hidden="true" focusable="false"><use href="assets/icons.svg#ic-guide"/></svg><h1>Проводник по претензии</h1></div><a class="role side" href="memuarist.html" title="История кейсов и статистика"><svg class="rico" aria-hidden="true" focusable="false"><use href="assets/icons.svg#ic-historian"/></svg><span class="rname">Историк</span></a></nav></header>
 <main class="app">
   <div class="settings-panel" id="conn"><h3>Подключение к GitHub</h3>
     <p>Токен хранится только в этом браузере (localStorage) и никогда не попадает в код страницы или в репозиторий. На новом устройстве введите его заново. Нужен fine-grained personal access token с правом Contents: Read and write для репозитория с данными.</p>
@@ -25,6 +25,11 @@
     <p class="hint msg" id="c-msg" role="status"></p>
   </div>
 
+  <!-- Верхнее сквозное CRM-меню (отображается на всех шагах при наличии ссылок) -->
+  <nav class="crm-top-bar" id="crm-top-bar" hidden aria-label="Ссылки CRM">
+    <div class="crm-bar-links" id="crm-bar-links"></div>
+  </nav>
+
   <div class="progress" id="progress" aria-hidden="true"></div>
 
   <!-- ШАГ 1 -->
@@ -35,18 +40,49 @@
     <details class="helper" id="helper" open>
       <summary><svg class="ds" aria-hidden="true" focusable="false"><use href="assets/icons.svg#ic-deepseek"/></svg><span>Помощник DeepSeek: разобрать чат с клиентом</span></summary>
       <div class="body">
-        <ol class="how">
-          <li><a href="https://chat.deepseek.com/" target="_blank" rel="noopener">Откройте новый чат DeepSeek</a> и вставьте промт (кнопка ниже).</li>
-          <li>Когда DeepSeek ответит «Жду», вставьте текст чата с клиентом.</li>
-          <li>Вставьте ответ DeepSeek сюда и нажмите «Разобрать».</li>
-        </ol>
-        <p><button class="next small" id="copy-prompt" type="button"><svg class="i" aria-hidden="true" focusable="false"><use href="assets/icons.svg#i-clip"/></svg>Скопировать промт step001</button> <span class="hint" id="prompt-state" role="status"></span></p>
-        <details class="inner"><summary>Показать текст промта</summary><pre id="prompt-text"></pre></details>
-        <label style="margin-top:14px">Ссылка на этот чат DeepSeek (чтобы вернуться к нему на следующих шагах)
-          <input type="url" id="chatlink" placeholder="https://chat.deepseek.com/...">
-        </label>
-        <label>Ответ DeepSeek
-          <textarea id="answer" placeholder="ЗАКАЗ: ...&#10;ПРОБЛЕМА: ...&#10;ТРЕБОВАНИЕ: ..."></textarea>
+        <p class="hint" style="margin-top:0">Вставьте слепок чата с клиентом из CRM, укажите номер тикета и адрес карточки клиента, затем нажмите кнопку «Собрать промт step001 и скопировать» и отправьте собранный промт в <a href="https://chat.deepseek.com/" target="_blank" rel="noopener">DeepSeek</a>.</p>
+        
+        <div class="helper-inputs-grid">
+          <div>
+            <label for="helper-datetime">Дата и время диалога (опорная точка)
+              <div class="input-with-btn">
+                <input type="datetime-local" id="helper-datetime">
+                <button class="next small" id="btn-helper-now" type="button" title="Установить текущее время">Сейчас</button>
+              </div>
+            </label>
+          </div>
+          <div>
+            <label for="helper-ticket">Номер вашего тикета
+              <input type="text" id="helper-ticket" placeholder="Например: 746899721" autocomplete="off">
+            </label>
+          </div>
+          <div class="full-width">
+            <label for="helper-client-url">Адрес карточки клиента в CRM
+              <input type="url" id="helper-client-url" placeholder="https://crm.o3team.ru/clients/nbvtyqap" autocomplete="off">
+            </label>
+          </div>
+          <div class="full-width">
+            <label for="helper-chat">Слепок чата с клиентом из CRM (включая сообщения бота и шум)
+              <textarea id="helper-chat" rows="6" placeholder="Вставьте сюда скопированный текст переписки из WebCRM..."></textarea>
+            </label>
+          </div>
+        </div>
+
+        <div class="helper-actions">
+          <button class="next small pri" id="build-copy-prompt" type="button">
+            <svg class="i" aria-hidden="true" focusable="false"><use href="assets/icons.svg#i-clip"/></svg>
+            Собрать промт step001 и скопировать
+          </button>
+          <span class="hint" id="prompt-state" role="status"></span>
+        </div>
+
+        <details class="inner" style="margin-top:10px">
+          <summary>Показать собранный текст промта</summary>
+          <pre id="prompt-text"></pre>
+        </details>
+
+        <label style="margin-top:14px">Ответ DeepSeek
+          <textarea id="answer" placeholder="Вставьте сюда ответ DeepSeek (ЗАКАЗ: ..., ПРОБЛЕМА: ..., ТРЕБОВАНИЕ: ...)"></textarea>
         </label>
         <button class="next" id="parse" type="button"><svg class="i" aria-hidden="true" focusable="false"><use href="assets/icons.svg#i-spark"/></svg>Разобрать ответ и заполнить поля</button>
       </div>
@@ -54,6 +90,14 @@
     <p class="hint msg" id="parse-msg" role="status"></p>
 
     <div class="fields">
+      <div>
+        <label for="case-datetime">Дата и время обращения (таймштамп кейса)
+          <div class="input-with-btn">
+            <input type="datetime-local" id="case-datetime">
+            <button class="next small" id="btn-case-now" type="button" title="Установить текущее время">Сейчас</button>
+          </div>
+        </label>
+      </div>
       <label>Номер вашего тикета
         <input type="text" id="ticket" autocomplete="off">
       </label>
@@ -61,7 +105,7 @@
         <input type="text" id="order" autocomplete="off">
       </label>
       <label>Адрес карточки клиента в CRM (по нему строятся ссылки на тикет и заказ)
-        <input type="url" id="client-url" autocomplete="off" placeholder="https://…/clients/…">
+        <input type="url" id="client-url" autocomplete="off" placeholder="https://crm.o3team.ru/clients/…">
       </label>
       <p class="hint msg" id="client-url-msg" role="status"></p>
       <label>Суть проблемы клиента
@@ -99,7 +143,7 @@
     <details class="helper" id="helper2" open>
       <summary><svg class="ds" aria-hidden="true" focusable="false"><use href="assets/icons.svg#ic-deepseek"/></svg><span>Помощник DeepSeek: хронология, статус, темы</span></summary>
       <div class="body">
-        <p class="hint">Вставьте промт <span id="chat-link-slot">в тот же чат DeepSeek, где вы разбирали претензию</span>. Текст чата заново вставлять не нужно. DeepSeek сначала спросит, проставлены ли в тикете уже какие-то темы: ответьте ему, перечислив их, или напишите «нет».</p>
+        <p class="hint">Вставьте промт в тот же чат DeepSeek, где вы разбирали претензию на шаге 1. Текст чата заново вставлять не нужно. DeepSeek сначала спросит, проставлены ли в тикете уже какие-то темы: ответьте ему, перечислив их, или напишите «нет».</p>
         <p><button class="next small" id="copy-prompt2" type="button"><svg class="i" aria-hidden="true" focusable="false"><use href="assets/icons.svg#i-clip"/></svg>Скопировать промт step002</button> <span class="hint" id="prompt2-state" role="status"></span></p>
         <details class="inner"><summary>Показать текст промта</summary><pre id="prompt2-text"></pre></details>
         <label style="margin-top:14px">Ответ DeepSeek
@@ -128,8 +172,26 @@
       </div>
       <p class="hint" id="theme-hint"></p>
       <p class="hint" id="theme-source"></p>
-      <p class="hint">Если в тикете уже есть тема, поставленная ботом автоматически, проверьте её: неверную удалите и выберите правильную.</p>
       <ul class="tlist" id="theme-list"></ul>
+
+      <!-- Блок похожих кейсов из архива по выбранным темам -->
+      <div class="similar-cases-box" id="similar-cases-box">
+        <div class="fieldlabel" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+          <span style="font-weight:700;display:inline-flex;align-items:center;gap:6px;color:var(--ink);">
+            <svg class="i" aria-hidden="true" focusable="false" style="color:var(--ac);"><use href="assets/icons.svg#i-spark"/></svg>
+            Похожие кейсы из базы (по темам обращения)
+          </span>
+          <button class="next small" id="copy-similar-digest" type="button" style="padding:4px 10px;font-size:12px;" title="Скопировать выжимку похожих кейсов для DeepSeek">
+            <svg class="i" aria-hidden="true" focusable="false"><use href="assets/icons.svg#i-clip"/></svg>
+            Скопировать выжимку для DeepSeek
+          </button>
+        </div>
+        <p class="hint" style="margin:2px 0 8px;">Короткая выдержка из manifest.json: темы, суть проблемы, вердикт и что сработало в похожих ситуациях.</p>
+        <div id="similar-cases-list" class="similar-list">
+          <p class="hint" style="font-style:italic;margin:6px 0;">Добавьте темы обращения выше, чтобы найти похожие кейсы из архива.</p>
+        </div>
+        <span class="hint" id="similar-copy-status" role="status" style="font-size:12px;color:var(--good);display:block;margin-top:4px;"></span>
+      </div>
     </div>
 
     <div class="actions">
@@ -242,7 +304,7 @@
     </div>
     <div class="modal-body">
       <p class="hint" style="margin:0 0 10px;">Выберите кейс из архива operator-data для загрузки в форму:</p>
-      <input type="text" id="modal-search" placeholder="Поиск по номеру тикета, заказу, заголовку…" autocomplete="off">
+      <input type="text" id="modal-search" placeholder="Поиск по названию кейса, тикету, заказу…" autocomplete="off">
       <ul class="modal-list" id="modal-case-list">
         <li class="hint" style="padding:10px;">Загрузка списка кейсов…</li>
       </ul>

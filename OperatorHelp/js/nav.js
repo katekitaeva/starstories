@@ -3,6 +3,7 @@
 
 import { TOTAL, STEP_COUNT } from "./config.js";
 import { state, save } from "./state.js";
+import { updateCrmBar } from "./crm.js";
 
 const renderHooks = [];
 /** fn вызывается в render(), когда текущий шаг >= minStep */
@@ -10,6 +11,7 @@ export function onRender(minStep, fn) { renderHooks.push([minStep, fn]); }
 
 export function renderProgress() {
   const bar = document.getElementById("progress");
+  if (!bar) return;
   bar.innerHTML = "";
   for (let i = 1; i <= TOTAL; i++) {
     const s = document.createElement("span");
@@ -23,15 +25,19 @@ export function render() {
   renderProgress();
   for (let n = 1; n <= STEP_COUNT; n++) {
     const el = document.getElementById("step-" + n);
-    el.hidden = n > state.current;
-    el.classList.toggle("collapsed", n < state.current);
+    if (el) {
+      el.hidden = n > state.current;
+      el.classList.toggle("collapsed", n < state.current);
+    }
   }
+  updateCrmBar();
   renderHooks.forEach(([min, fn]) => { if (state.current >= min) fn(); });
 }
 
 export function goTo(n) {
   state.current = n; save(); render();
-  document.getElementById("step-" + n).scrollIntoView();
+  const target = document.getElementById("step-" + n);
+  if (target) target.scrollIntoView({ behavior: "smooth" });
 }
 
 export function initNav() {
@@ -40,4 +46,13 @@ export function initNav() {
     const n = +b.dataset.n;
     if (state.current > n) goTo(n);
   }));
+
+  // Живое обновление CRM-меню при вводе ключевых полей
+  ["ticket", "order", "client-url"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.addEventListener("input", updateCrmBar);
+      el.addEventListener("change", updateCrmBar);
+    }
+  });
 }

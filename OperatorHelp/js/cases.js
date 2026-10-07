@@ -2,7 +2,7 @@
 
 import { $, val } from "./ui.js";
 import { state, save } from "./state.js";
-import { parseClientUrl, savedOrigin } from "./crm.js";
+import { parseClientUrl, savedOrigin, updateCrmBar } from "./crm.js";
 import { verdict } from "./steps/step3.js";
 import { getThemesVersion } from "./steps/step2.js";
 import { ghPut } from "./github.js";
@@ -80,7 +80,10 @@ export function buildCaseCard() {
   const clientRef = parseClientUrl(val("client-url"));
   const clientId = (clientRef && clientRef.clientId) || (state.loadedCase && state.loadedCase.clientId) || null;
 
-  const date = (state.loadedCase && state.loadedCase.date) || new Date().toISOString().slice(0, 10);
+  const dtInput = (val("case-datetime") || "").trim();
+  const dateFromInput = dtInput ? dtInput.slice(0, 10) : "";
+  const date = dateFromInput || (state.loadedCase && state.loadedCase.date) || new Date().toISOString().slice(0, 10);
+  const caseDatetime = dtInput || (state.loadedCase && state.loadedCase.caseDatetime) || null;
   const now = new Date().toISOString();
 
   const themes = (state.themes || []).map(t => ({
@@ -112,6 +115,7 @@ export function buildCaseCard() {
     id: (state.loadedCase && state.loadedCase.id) || ticket || order || ("case_" + Date.now()),
     title: val("case-title").trim(),
     date,
+    caseDatetime,
     createdAt: (state.loadedCase && state.loadedCase.createdAt) || now,
     updatedAt: now,
     ticket,
@@ -182,8 +186,14 @@ export function loadCaseIntoForm(card, file) {
     if (el) el.value = (v !== undefined && v !== null) ? v : "";
   };
 
-  // Шаг 1
+  // Шаг 1: дата/время, тикет, заказ, поля претензии
+  const loadedDt = card.caseDatetime || (card.date ? `${card.date}T12:00` : "");
+  if (loadedDt) {
+    setVal("case-datetime", loadedDt);
+    setVal("helper-datetime", loadedDt);
+  }
   setVal("ticket", card.ticket || "");
+  setVal("helper-ticket", card.ticket || "");
   setVal("order", card.order || "");
   setVal("problem", card.problem || "");
   setVal("demand", card.demand || "");
@@ -230,10 +240,12 @@ export function loadCaseIntoForm(card, file) {
     }
   }
 
-  // Восстановление CRM ссылки, если есть сохранённый origin
+  // Восстановление CRM ссылки, если есть сохранённый origin или дефолтный хост
   const origin = savedOrigin();
   if (origin && card.clientId) {
-    setVal("client-url", `${origin}/clients/${card.clientId}`);
+    const fullClientUrl = `${origin}/clients/${card.clientId}`;
+    setVal("client-url", fullClientUrl);
+    setVal("helper-client-url", fullClientUrl);
   }
 
   // Темы
@@ -257,6 +269,7 @@ export function loadCaseIntoForm(card, file) {
   };
   state.caseSaved = true;
 
+  updateCrmBar();
   save();
   return true;
 }

@@ -227,8 +227,19 @@
         <input type="text" id="theme-manual" placeholder="или впишите тему вручную">
         <button class="next small" id="add-theme" type="button">Добавить тему</button>
       </div>
-      <p class="hint" id="theme-hint"></p>
       <ul class="tlist" id="theme-list"></ul>
+
+      <div class="similar-cases-box" id="similar-cases-box" style="margin-top:16px;">
+        <div class="fieldlabel" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+          <span style="font-weight:700;">Похожие кейсы из базы (по темам обращения)</span>
+          <button class="next small" id="copy-similar-digest" type="button" style="padding:4px 10px;font-size:12px;">Скопировать выжимку для DeepSeek</button>
+        </div>
+        <p class="hint" style="margin:2px 0 8px;">Короткая выдержка из manifest.json: темы, суть проблемы, вердикт и что сработало в похожих ситуациях.</p>
+        <div id="similar-cases-list">
+          <p class="hint" style="font-style:italic;margin:6px 0;">Добавьте темы обращения выше, чтобы найти похожие кейсы из архива.</p>
+        </div>
+        <span class="hint" id="similar-copy-status" role="status" style="font-size:12px;display:block;margin-top:4px;"></span>
+      </div>
     </div>
 
     <div class="actions">

@@ -6,7 +6,7 @@ import { state, save, load } from "./state.js";
 import { $ } from "./ui.js";
 import { render, initNav } from "./nav.js";
 import { connSummary, initConnection } from "./github.js";
-import { initStep1, loadPrompt, updateClientUrlMsg } from "./steps/step1.js";
+import { initStep1, loadPrompt, updateClientUrlMsg, currentLocalDatetime, updateHelperVisibility } from "./steps/step1.js";
 import { initStep2, renderThemes, renderSummary } from "./steps/step2.js";
 import { initStep3, renderVerdict } from "./steps/step3.js";
 import { initStep4, updPh } from "./steps/step4.js";
@@ -32,7 +32,15 @@ FIELDS.forEach(f => {
 export function resetClaimForm() {
   FIELDS.forEach(f => { const el = $(f); if (el) el.value = ""; });
   CHECKS.forEach(c => { const el = $(c); if (el) el.checked = false; });
-  ["theme-manual", "t1", "t2", "t3"].forEach(id => { const el = $(id); if (el) el.value = ""; });
+  ["theme-manual", "t1", "t2", "t3", "helper-ticket", "helper-client-url", "helper-chat"].forEach(id => {
+    const el = $(id); if (el) el.value = "";
+  });
+
+  const nowDt = currentLocalDatetime();
+  const dtEl = $("case-datetime");
+  const helperDtEl = $("helper-datetime");
+  if (dtEl) dtEl.value = nowDt;
+  if (helperDtEl) helperDtEl.value = nowDt;
 
   state.current = 1;
   state.themes = [];
@@ -50,6 +58,7 @@ export function resetClaimForm() {
   try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
   save();
 
+  updateHelperVisibility();
   renderThemes();
   renderSummary();
   renderVerdict();
